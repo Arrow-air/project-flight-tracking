@@ -13,7 +13,7 @@
             <ul class="menu menu-horizontal px-1">
                 <li><RouterLink to="/aircraft">Aircraft</RouterLink></li>
                 <li><RouterLink to="/flights">Flights</RouterLink></li>
-                <li><RouterLink to="/upload">Upload</RouterLink></li>
+                <!-- <li><RouterLink to="/upload">Upload</RouterLink></li> -->
             </ul>
         </div>
 
@@ -48,13 +48,9 @@
                     </div>
                     <ul tabindex="0"
                         class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                        <li>
-                            <RouterLink to="/profile" class="justify-between">
-                                <span>Profile</span>
-                            </RouterLink>
-                        </li>
-
-                        <li><a>My Aircraft</a></li>
+                        
+                        <li><RouterLink to="/profile">Profile</RouterLink></li>
+                        <li><RouterLink to="/aircraft">My Aircraft</RouterLink></li>
                         <li><a @click="handleLogout">Logout</a></li>
                     </ul>
                 </div>

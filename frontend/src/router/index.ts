@@ -15,8 +15,14 @@ const routes: Array<RouteRecordRaw> = [
         children: [
             { path: '', name: 'Home', component: () => import('@/views/Home.vue'), meta: { requiresAuth: false } },
             { path: 'profile', name: 'Profile', component: () => import('@/views/user/Profile.vue'), meta: { requiresAuth: true } },
+
+            // Aircraft Pages
             { path: 'aircraft', name: 'AircraftList', component: () => import('@/views/aircraft/ListAircraftPage.vue'), meta: { requiresAuth: true } },
             { path: 'aircraft/:id', name: 'Aircraft', component: () => import('@/views/aircraft/AircraftPage.vue'), meta: { requiresAuth: true } },
+
+            // Flight Pages
+            { path: 'flights', name: 'Flights', component: () => import('@/views/flights/ListFlightsPage.vue'), meta: { requiresAuth: true } },
+            { path: 'flights/:flight_id', name: 'Flight Record', component: () => import('@/views/flights/FlightRecordPage.vue'), meta: { requiresAuth: true } },
         ]
     }
 ];
