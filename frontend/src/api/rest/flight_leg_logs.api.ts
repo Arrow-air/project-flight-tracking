@@ -5,7 +5,7 @@ import { withErrorHandling, requireAuth } from '@/api/errorHandler'
 import { useAuthStore } from '@/stores/auth.store'
 
 const ENTITY_NAME = 'flight_leg_logs'
-const DEFAULT_BUCKET = 'flight-logs'
+const DEFAULT_BUCKET = 'flight_logs'
 
 export interface FlightLogRow {
 	id: string
@@ -105,6 +105,19 @@ async function computeSha256Hex(file: File): Promise<string> {
 	return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
+function safeFilename(name: string) {
+    const dot = name.lastIndexOf('.')
+    const base = (dot > -1 ? name.slice(0, dot) : name)
+      .normalize('NFKD')
+      .replace(/[^\w.-]+/g, '-')   // collapse weird chars
+      .replace(/-+/g, '-')         // collapse repeats
+      .replace(/^-|-$/g, '')       // trim dashes
+      .toLowerCase()
+    const ext = dot > -1 ? name.slice(dot).toLowerCase() : ''
+    const trimmed = base.length > 60 ? base.slice(-60) : base
+    return `${trimmed}${ext || ''}`
+}
+
 export async function uploadFlightLog(
 	flightLegId: string,
 	file: File,
@@ -112,12 +125,19 @@ export async function uploadFlightLog(
 ): Promise<FlightLogData> {
 	const authStore = useAuthStore()
 	const operation = 'upload flight log'
-	requireAuth(authStore, operation)
-	if (!flightLegId) throw new Error('flightLegId is required')
-	if (!file) throw new Error('file is required')
+	requireAuth(authStore, operation);
+	if (!flightLegId) throw new Error('flightLegId is required');
+	if (!file) throw new Error('file is required');
 
 	const bucket = options.bucket || DEFAULT_BUCKET
-	const objectPath = `${authStore.userId}/${flightLegId}/${crypto.randomUUID()}_${file.name}`
+
+    const safe = safeFilename(file.name)           // e.g. "2025-08-13-flight1.bin"
+    const date = new Date()
+    const yyyy = String(date.getFullYear())
+    const mm   = String(date.getMonth() + 1).padStart(2, '0')
+    const dd   = String(date.getDate()).padStart(2, '0')
+
+    const objectPath = `${authStore.userId}/${flightLegId}/${yyyy}/${mm}/${dd}/${crypto.randomUUID()}_${safe}`
 	const contentType = file.type || 'application/octet-stream'
 	const sizeBytes = file.size
 	let checksumSha256: string | null = null

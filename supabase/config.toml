@@ -53,6 +53,8 @@ enabled = true
 schema_paths = [
     "./schemas/core.sql",
 
+    "./schemas/buckets/flight_logs.sql",
+
     "./schemas/users/user_profiles.sql",
     "./schemas/tags.sql",
 
@@ -114,18 +116,34 @@ port = 54324
 [storage]
 enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "50MiB"
+file_size_limit = "750MiB"
 
 # Image transformation API is available to Supabase Pro plan.
 # [storage.image_transformation]
 # enabled = true
 
 # Uncomment to configure local storage buckets
-# [storage.buckets.images]
-# public = false
-# file_size_limit = "50MiB"
-# allowed_mime_types = ["image/png", "image/jpeg"]
-# objects_path = "./images"
+[storage.buckets.flight_logs]
+public = false
+file_size_limit = "750MiB"
+# Allow common ArduPilot log formats and other binary files, plus images
+allowed_mime_types = [
+  "image/png",
+  "image/jpeg",
+  "application/octet-stream",   # Generic binary
+  "application/zip",            # Zipped logs
+  "application/x-gzip",         # Gzipped logs
+  "text/plain",                 # Some logs may be plain text
+  "application/vnd.ms-excel",   # .csv logs
+  "application/x-tlog",         # ArduPilot telemetry logs
+  "application/x-bin",          # Binary logs
+  "application/x-log",          # .log files
+  "application/x-mavlink-log",  # MAVLink logs
+  "application/x-apj",          # .apj parameter files
+  "application/x-binary"        # Generic binary
+]
+objects_path = "./storage/flight_logs"
+
 
 [auth]
 enabled = true
