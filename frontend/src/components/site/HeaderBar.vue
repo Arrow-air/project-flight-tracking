@@ -17,6 +17,9 @@
             </ul>
         </div>
 
+        <!-- Divider between nav items and user actions -->
+        <div class="divider divider-horizontal mx-2 h-8 self-stretch"></div>
+
         <!-- User Actions -->
         <div class="flex gap-2">
 
@@ -72,7 +75,7 @@ import { useAuthStore } from '@/stores/auth.store';
 
 const authStore = useAuthStore();
 const isAuthenticated = computed(() => authStore.isAuthenticated);
-const loading = computed(() => authStore.loading);
+// const loading = computed(() => authStore.loading);
 
 async function handleLogout() {
     await authStore.logout();

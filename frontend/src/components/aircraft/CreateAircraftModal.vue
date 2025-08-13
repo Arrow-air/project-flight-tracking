@@ -47,16 +47,12 @@ const loading = ref(false);
 const error = ref('');
 const form = reactive<CreateAircraftInput>({ name: '', aircraftType: '', serialNumber: '', notes: '' });
 
-function open() {
-	modalRef.value?.showModal();
-}
-
-function close() {
-	modalRef.value?.close();
-}
+function open() { modalRef.value?.showModal(); }
+function close() { modalRef.value?.close(); }
 
 defineExpose({ open, close });
 
+// Creates the aircraft
 async function submit() {
 	try {
 		loading.value = true;

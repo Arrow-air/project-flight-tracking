@@ -88,6 +88,9 @@
 					</template>
 				</div>
 			</div>
+
+			<!-- Maintenance logs section -->
+			<MaintenanceLogsSection v-if="aircraft" :aircraft-id="aircraft.id" />
 		</div>
 
 		<!-- Delete confirmation modal -->
@@ -121,6 +124,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { AircraftData, UpdateAircraftInput } from '@/api/rest/aircraft.api'
 import { getAircraft, updateAircraft, deleteAircraft } from '@/api/rest/aircraft.api'
+import MaintenanceLogsSection from '@/components/aircraft_maintenance/MaintenanceLogsSection.vue';
 
 const route = useRoute()
 const router = useRouter()
