@@ -42,7 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
 
         if (event === 'SIGNED_IN') {
           if (!wasAuthenticated && router.currentRoute.value.name === 'Login') {
-            router.push({ name: 'Dashboard' });
+            router.push({ name: 'Home' });
           }
         } else if (event === 'SIGNED_OUT') {
           router.push({ name: 'Login' });
