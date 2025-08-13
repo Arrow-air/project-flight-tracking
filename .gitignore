@@ -1,0 +1,45 @@
+
+
+
+# Node
+node_modules/
+package-lock.json
+pnpm-lock.yaml
+bun.lockb
+bun.lock
+
+# Yarn Berry (v2+)
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.cjs
+.pnp.loader.mjs
+
+# Environments
+.env
+.env.*
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Keep example environment variables
+!.env.example 
+
+# Don't ignore frontend.env
+# Usefult for Vite & Vue configurations
+!frontend/.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
