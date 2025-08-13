@@ -18,7 +18,7 @@ bun.lock
 .pnp.loader.mjs
 
 # Environments
-.env
+**/.env
 .env.*
 .venv
 env/
@@ -28,7 +28,7 @@ env.bak/
 venv.bak/
 
 # Keep example environment variables
-!.env.example 
+**/!.env.example 
 
 # Don't ignore frontend.env
 # Usefult for Vite & Vue configurations
