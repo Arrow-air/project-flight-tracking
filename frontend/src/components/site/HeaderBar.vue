@@ -9,7 +9,13 @@
         </div>
 
         <!-- Navbar Links -->
-
+        <div class="flex-none">
+            <ul class="menu menu-horizontal px-1">
+                <li><RouterLink to="/aircraft">Aircraft</RouterLink></li>
+                <li><RouterLink to="/flights">Flights</RouterLink></li>
+                <li><RouterLink to="/upload">Upload</RouterLink></li>
+            </ul>
+        </div>
 
         <!-- User Actions -->
         <div class="flex gap-2">

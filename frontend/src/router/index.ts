@@ -15,6 +15,8 @@ const routes: Array<RouteRecordRaw> = [
         children: [
             { path: '', name: 'Home', component: () => import('@/views/Home.vue'), meta: { requiresAuth: false } },
             { path: 'profile', name: 'Profile', component: () => import('@/views/user/Profile.vue'), meta: { requiresAuth: true } },
+            { path: 'aircraft', name: 'AircraftList', component: () => import('@/views/aircraft/ListAircraftPage.vue'), meta: { requiresAuth: true } },
+            { path: 'aircraft/:id', name: 'Aircraft', component: () => import('@/views/aircraft/AircraftPage.vue'), meta: { requiresAuth: true } },
         ]
     }
 ];
