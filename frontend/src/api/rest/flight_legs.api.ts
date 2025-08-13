@@ -18,6 +18,7 @@ export interface FlightLegRow {
 	temp_c: number | null
 	title: string | null
 	description: string | null
+	user_profiles?: { full_name: string } | null
 }
 
 // App-facing model (camelCase)
@@ -32,6 +33,7 @@ export interface FlightLegData {
 	tempC: number | null
 	title: string | null
 	description: string | null
+	pilotName?: string | null
 }
 
 export type CreateFlightLegInput = {
@@ -64,6 +66,7 @@ function mapRowToData(row: FlightLegRow): FlightLegData {
 		tempC: row.temp_c,
 		title: row.title,
 		description: row.description,
+		pilotName: row.user_profiles?.full_name ?? null,
 	}
 }
 
@@ -79,7 +82,7 @@ export async function listFlightLegs(options: {
 	const result = await withErrorHandling(async () => {
 		let query = supabase
 			.from(ENTITY_NAME)
-			.select('*')
+			.select('*, user_profiles(full_name)')
 			.eq('pilot_id', authStore.userId)
 			.order('created_at', { ascending: options.order === 'asc' ? true : false })
 
@@ -105,7 +108,7 @@ export async function getFlightLeg(id: string): Promise<FlightLegData> {
 	const result = await withErrorHandling(async () => {
 		const { data, error } = await supabase
 			.from(ENTITY_NAME)
-			.select('*')
+			.select('*, user_profiles(full_name)')
 			.eq('id', id)
 			.eq('pilot_id', authStore.userId)
 			.single()

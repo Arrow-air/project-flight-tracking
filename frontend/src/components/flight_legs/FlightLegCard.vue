@@ -1,5 +1,8 @@
 <template>
-	<RouterLink class="card bg-base-100 shadow block" :to="{ name: 'Flight Record', params: { flight_id: leg.id } }">
+	<RouterLink
+		class="card bg-base-100 shadow block cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-xl hover:ring-2 hover:ring-primary/40"
+		:to="{ name: 'Flight Record', params: { flight_id: leg.id } }"
+	>
 		<div class="card-body">
 			<div class="flex items-start justify-between gap-3">
 				<div class="space-y-1">
