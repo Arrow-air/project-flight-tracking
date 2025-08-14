@@ -3,6 +3,7 @@
 .temp
 
 # dotenvx
+# Private keys for encrypting envs are stored in `.env.keys`
 .env.keys
 .env.local
 .env.*.local

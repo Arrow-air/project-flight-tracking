@@ -1,0 +1,34 @@
+name: Branch Supabase DeployStatus
+
+# [TLDR] This workflow is used to notify the team when the Supabase database is not deployed successfully.
+#
+# On all PRs, a separate environment is created and the database is deployed to it on Supabase.
+# If the database is not deployed successfully, the workflow will fail and notify the team.
+#
+# Docs: https://supabase.com/docs/guides/deployment/branching/github-integration#preventing-migration-failures
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    branches:
+      - main # Production, the one people use
+      - staging # Staging, the one devs use to make sure it's okay to send to production
+    paths:
+      - 'supabase/**'
+
+jobs:
+  failed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: fountainhead/action-wait-for-check@v1.2.0
+        id: check
+        with:
+          checkName: Supabase Preview
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ steps.check.outputs.conclusion == 'failure' }}
+        run: exit 1
