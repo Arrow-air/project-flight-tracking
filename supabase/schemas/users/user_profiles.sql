@@ -67,22 +67,6 @@ CREATE TRIGGER on_auth_user_created
   EXECUTE FUNCTION public.handle_new_user();
 
 -- =========================================================================
--- VIEW: public.users_with_auth
--- =========================================================================
-CREATE OR REPLACE VIEW public.users_with_auth AS
-SELECT
-  au.id,
-  au.email,
-  au.email_confirmed_at,
-  au.created_at AS auth_created_at,
-  up.full_name,
-  up.role,
-  up.created_at,
-  up.updated_at
-FROM auth.users au
-LEFT JOIN public.user_profiles up ON au.id = up.id;
-
--- =========================================================================
 -- ROW LEVEL SECURITY POLICIES
 -- =========================================================================
 
@@ -108,4 +92,3 @@ CREATE POLICY user_profiles_insert_own
 -- GRANTS
 -- =========================================================================
 GRANT SELECT, INSERT, UPDATE ON public.user_profiles TO authenticated;
-GRANT SELECT ON public.users_with_auth TO authenticated;

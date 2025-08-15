@@ -17,6 +17,17 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed<string>(() => user.value?.email || '');
   const userId = computed<string>(() => user.value?.id || '');
 
+  const getURL = () => {  
+    let url = 
+      import.meta.env.VITE_SUPABASE_URL ?? // site URL in production env.
+      import.meta.env.VITE_VERCEL_URL ?? // Automatically set by Vercel.
+      window.location.origin ?? // Wherever the user is
+      'http://localhost:3000/';
+    url = url.startsWith('http') ? url : `https://${url}`;
+    url = url.endsWith('/') ? url : `${url}/`;
+    return url;
+  }
+
   // Actions
   async function initialize(): Promise<void> {
     try {
@@ -77,7 +88,10 @@ export const useAuthStore = defineStore('auth', () => {
       const { error } = await supabase.auth.signUp({
         email: email.trim(),
         password,
-        options: { data: { full_name: fullName } },
+        options: { 
+          data: { full_name: fullName },
+          emailRedirectTo: `${getURL()}`,
+        },
       });
       if (error) throw error;
     } finally {
