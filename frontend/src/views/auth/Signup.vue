@@ -52,9 +52,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth.store';
+import { useRouter } from 'vue-router';
 
 // Record the user's login state
 const authStore = useAuthStore();
+const router = useRouter();
 
 // Form data
 const fullName = ref('');
@@ -95,11 +97,14 @@ async function handleRegister() {
     await authStore.register(email.value, password.value, fullName.value)
     
     success.value = 'Account created successfully! Please check your email to confirm your account.'
-      // Clear form
-      fullName.value = ''
-      email.value = ''
-      password.value = ''
-      confirmPassword.value = ''
+	// Clear form
+	fullName.value = ''
+	email.value = ''
+	password.value = ''
+	confirmPassword.value = ''
+
+	// Redirect to home
+	router.push('/');
   } catch (err) {
     if (err instanceof Error) {
       error.value = err.message || 'Registration failed. Please try again.';
