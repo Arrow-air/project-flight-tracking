@@ -1,5 +1,5 @@
-import { ref, type Ref } from 'vue'
-import { useAuthStore } from '@/stores/auth.store'
+import { type Ref } from 'vue';
+import { useAuthStore } from '@/stores/auth.store';
 
 export type ApiErrorType = 'auth' | 'network' | 'validation' | 'server' | 'cancelled' | 'unknown'
 

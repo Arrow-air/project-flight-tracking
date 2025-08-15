@@ -1,7 +1,7 @@
 
 
-export const restApiBaseURL: string = import.meta.env.VITE_REST_API_BASE_URL || "http://localhost:8000";
-// export const graphqlApiBaseURL: string = import.meta.env.VITE_GRAPHQL_API_BASE_URL || "http://localhost:8000/graphql";
+export const restApiBaseURL = import.meta.env.VITE_SUPABASE_URL || "http://localhost:8000";
+export const graphqlApiBaseURL = restApiBaseURL ? `${restApiBaseURL}/graphql` : "http://localhost:8000/graphql";
 
 export function logViteEnvironment() {
     console.log(`Using REST API URL: ${restApiBaseURL}`);

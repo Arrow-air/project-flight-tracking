@@ -154,6 +154,12 @@ enabled = true
 site_url = "http://127.0.0.1:3000" 
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
+  # Permit vercel app URLs
+  "https://project-flight-tracking.vercel.app", # Specific for this project
+  "https://project-flight-tracking-*-arrow-air.vercel.app", # Preview deployments
+  "https://*-arrow-air.vercel.app", # More general: all arrow-air apps
+
+
   "http://localhost:5173/*",
   "https://localhost:5173/*",
 

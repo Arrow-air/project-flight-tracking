@@ -10,6 +10,8 @@ CREATE TABLE public.flight_leg_logs (
   uploaded_by_id uuid REFERENCES public.user_profiles(id),
 
   -- Data
+  title text NOT NULL,
+  notes text,
   size_bytes bigint,
   bucket text NOT NULL DEFAULT 'flight-logs',
   object_path text NOT NULL,
