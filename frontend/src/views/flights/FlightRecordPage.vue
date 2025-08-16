@@ -18,8 +18,8 @@
         
         <!-- Flight logs: upload and list -->
         <div v-if="leg" class="mt-6 grid gap-4">
-            <FlightLogUpload :flight-leg-id="leg.id" />
-            <FlightLogsList :flight-leg-id="leg.id" />
+            <FlightLogUpload :flight-leg-id="leg.id" @uploaded="onLogUploaded" />
+            <FlightLogsList :flight-leg-id="leg.id" :refresh-key="logRefreshKey" />
         </div>
 
 
@@ -54,6 +54,7 @@ const leg = ref<FlightLegData | null>(null)
 const loaded = ref(false)
 const error = ref('')
 const success = ref('')
+const logRefreshKey = ref(0);
 
 async function load() {
 	try {
@@ -71,6 +72,8 @@ async function load() {
 
 function handleUpdated(updated: FlightLegData) { leg.value = updated }
 function handleDeleted() { router.push({ name: 'Flights' }) };
+
+function onLogUploaded() { logRefreshKey.value++; }
 
 onMounted(load)
 </script>
