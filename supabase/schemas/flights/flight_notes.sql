@@ -41,3 +41,18 @@ CREATE TRIGGER set_updated_at_flight_notes
   BEFORE UPDATE ON public.flight_notes
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all flight notes
+--  - UPDATE any flight note
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view flight notes" ON public.flight_notes
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update flight notes" ON public.flight_notes
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);
