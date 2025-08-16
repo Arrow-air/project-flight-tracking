@@ -62,7 +62,6 @@ export async function listAircraft(): Promise<AircraftData[]> {
 		const { data, error } = await supabase
 			.from('aircraft')
 			.select('*')
-			.eq('owner_id', authStore.userId) // TODO: Should be only aircraft privileged to see (admin, self, etc.)
 			.order('updated_at', { ascending: false })
 
 		if (error) throw error
@@ -83,7 +82,6 @@ export async function getAircraft(id: string): Promise<AircraftData> {
 			.from('aircraft')
 			.select('*')
 			.eq('id', id)
-			.eq('owner_id', authStore.userId)
 			.single()
 
 		if (error) throw error
@@ -143,7 +141,6 @@ export async function updateAircraft(id: string, input: UpdateAircraftInput): Pr
 			.from('aircraft')
 			.update(payload)
 			.eq('id', id)
-			.eq('owner_id', authStore.userId)
 			.select('*')
 			.single()
 
@@ -166,7 +163,6 @@ export async function deleteAircraft(id: string): Promise<void> {
 			.from('aircraft')
 			.delete()
 			.eq('id', id)
-			.eq('owner_id', authStore.userId)
 
 		if (error) throw error
 	}, { operation, entity: ENTITY_NAME, authStore })

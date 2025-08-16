@@ -164,7 +164,6 @@ export async function updateMaintenanceLog(
 			.from(ENTITY_NAME)
 			.update(payload)
 			.eq('id', id)
-			.eq('author_id', authStore.userId)
 			.select('*')
 			.single()
 
@@ -188,7 +187,6 @@ export async function deleteMaintenanceLog(id: string): Promise<void> {
 			.from(ENTITY_NAME)
 			.delete()
 			.eq('id', id)
-			.eq('author_id', authStore.userId)
 
 		if (error) throw error
 	}, { operation, entity: ENTITY_NAME, authStore })

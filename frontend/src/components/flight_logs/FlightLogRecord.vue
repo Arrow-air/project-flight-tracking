@@ -13,6 +13,7 @@
 					</div>
 				</div>
 				<div class="card-actions">
+					
 					<a class="btn btn-ghost btn-sm" :href="signedUrl" target="_blank" rel="noopener" @click.prevent="openSigned">Open</a>
 					
 					<button class="btn btn-error btn-sm" @click="confirmDelete" :disabled="deleting">

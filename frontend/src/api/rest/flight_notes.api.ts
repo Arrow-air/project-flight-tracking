@@ -71,7 +71,6 @@ export async function listFlightNotes(
 			.from(ENTITY_NAME)
 			.select('*, user_profiles(full_name)')
 			.eq('flight_leg_id', flightLegId)
-			.eq('author_id', authStore.userId)
 			.order('created_at', { ascending: options.order === 'asc' ? true : false })
 
 		if (options.type) query = query.eq('note_type', options.type)
@@ -95,7 +94,6 @@ export async function getFlightNote(id: string): Promise<FlightNoteData> {
 			.from(ENTITY_NAME)
 			.select('*, user_profiles(full_name)')
 			.eq('id', id)
-			.eq('author_id', authStore.userId)
 			.single()
 
 		if (error) throw error
@@ -176,7 +174,6 @@ export async function deleteFlightNote(id: string): Promise<void> {
 			.from(ENTITY_NAME)
 			.delete()
 			.eq('id', id)
-			.eq('author_id', authStore.userId)
 
 		if (error) throw error
 	}, { operation, entity: ENTITY_NAME, authStore })
