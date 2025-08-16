@@ -9,11 +9,13 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - main
+      - staging
   workflow_dispatch:
 
 jobs:
   test:
-    if: ${{ false }} # <- This make sure the workflow is skipped without any alert
     runs-on: ubuntu-latest
 
     steps:
