@@ -29,3 +29,26 @@ ON storage.objects
 FOR delete
 TO authenticated
 USING (bucket_id = 'flight_logs' and (select auth.uid()) = owner_id::uuid);
+
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW any object metadata in the 'flight_logs' bucket
+--  - UPDATE any object metadata in the 'flight_logs' bucket
+-- Note: This does not change INSERT or DELETE, which remain as above.
+-- =============================================================
+
+CREATE POLICY "auth users can read any flight logs"
+ON storage.objects
+FOR select
+TO authenticated
+USING (bucket_id = 'flight_logs');
+
+CREATE POLICY "auth users can update any flight logs"
+ON storage.objects
+FOR update
+TO authenticated
+USING (bucket_id = 'flight_logs')
+WITH CHECK (bucket_id = 'flight_logs');

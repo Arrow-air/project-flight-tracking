@@ -34,3 +34,19 @@ CREATE TRIGGER set_updated_at_aircraft
   BEFORE UPDATE ON public.aircraft
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all aircraft
+--  - UPDATE any aircraft
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view aircraft" ON public.aircraft
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update aircraft" ON public.aircraft
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);

@@ -28,35 +28,36 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { listFlightLogs, type FlightLogData } from '@/api/rest/flight_leg_logs.api'
-import FlightLogRecord from '@/components/flight_logs/FlightLogRecord.vue'
+import { ref, onMounted, watch } from 'vue';
+import { listFlightLogs, type FlightLogData } from '@/api/rest/flight_leg_logs.api';
+import FlightLogRecord from '@/components/flight_logs/FlightLogRecord.vue';
 
-const props = defineProps<{ flightLegId: string }>()
+const props = defineProps<{ flightLegId: string; refreshKey?: number }>();
 
-const logs = ref<FlightLogData[]>([])
-const loading = ref(false)
-const error = ref('')
-const order = ref<'asc' | 'desc'>('desc')
+const logs = ref<FlightLogData[]>([]);
+const loading = ref(false);
+const error = ref('');
+const order = ref<'asc' | 'desc'>('desc');
 
 async function reload() {
 	try {
-		loading.value = true
-		error.value = ''
-		logs.value = await listFlightLogs(props.flightLegId, { order: order.value })
+		loading.value = true;
+		error.value = '';
+		logs.value = await listFlightLogs(props.flightLegId, { order: order.value });
 	} catch (e: any) {
-		error.value = e?.message || 'Failed to load logs'
+		error.value = e?.message || 'Failed to load logs';
 	} finally {
-		loading.value = false
+		loading.value = false;
 	}
 }
 
 function handleDeleted(id: string) {
-	logs.value = logs.value.filter((l) => l.id !== id)
+	logs.value = logs.value.filter((l) => l.id !== id);
+	reload();
 }
 
-watch(() => [props.flightLegId, order.value], reload)
-onMounted(reload)
+watch(() => [props.flightLegId, order.value, props.refreshKey], reload);
+onMounted(reload);
 </script>
 
 <style scoped></style>

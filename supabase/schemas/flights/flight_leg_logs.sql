@@ -10,10 +10,10 @@ CREATE TABLE public.flight_leg_logs (
   uploaded_by_id uuid REFERENCES public.user_profiles(id),
 
   -- Data
-  title text NOT NULL,
+  filename text NOT NULL,
   notes text,
   size_bytes bigint,
-  bucket text NOT NULL DEFAULT 'flight-logs',
+  bucket text NOT NULL DEFAULT 'flight_logs',
   object_path text NOT NULL,
   content_type text,
   checksum_sha256 text
@@ -32,8 +32,26 @@ CREATE POLICY "Users can update own flight leg logs" ON public.flight_leg_logs
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = uploaded_by_id)
 WITH CHECK ((SELECT auth.uid()) = uploaded_by_id);
 
+CREATE POLICY "Users can delete own flight leg logs" ON public.flight_leg_logs 
+FOR DELETE TO authenticated USING ((SELECT auth.uid()) = uploaded_by_id);
 
 CREATE TRIGGER set_updated_at_flight_leg_logs
   BEFORE UPDATE ON public.flight_leg_logs
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all flight leg logs metadata
+--  - UPDATE any flight leg log metadata
+-- Note: Storage object access is governed by storage policies.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view flight leg logs" ON public.flight_leg_logs
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update flight leg logs" ON public.flight_leg_logs
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);

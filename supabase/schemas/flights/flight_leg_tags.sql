@@ -42,3 +42,19 @@ SELECT
   tags.description AS tag_description
 FROM public.flight_leg_tags
 JOIN public.tags ON flight_leg_tags.tag_id = tags.id;
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all flight leg tags
+--  - UPDATE any flight leg tag link
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view flight leg tags" ON public.flight_leg_tags
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update flight leg tags" ON public.flight_leg_tags
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);

@@ -47,3 +47,19 @@ FOR SELECT TO authenticated USING (
 CREATE POLICY "Users can create maintenance logs" ON public.aircraft_maintenance_log 
 FOR INSERT TO authenticated 
 WITH CHECK ((SELECT auth.uid()) = author_id);
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all aircraft maintenance logs
+--  - UPDATE any aircraft maintenance log
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view aircraft maintenance logs" ON public.aircraft_maintenance_log
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update aircraft maintenance logs" ON public.aircraft_maintenance_log
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);

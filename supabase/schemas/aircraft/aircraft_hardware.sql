@@ -30,3 +30,19 @@ CREATE TRIGGER set_updated_at_aircraft_hardware
   BEFORE UPDATE ON public.aircraft_hardware
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all aircraft hardware rows
+--  - UPDATE any aircraft hardware row
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view aircraft hardware" ON public.aircraft_hardware
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update aircraft hardware" ON public.aircraft_hardware
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);
