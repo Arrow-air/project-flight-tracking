@@ -1,0 +1,36 @@
+name: CI
+
+# [TLDR] This workflow is used to check if the database types are up to date.
+#
+# On all PRs, the database types are generated and checked in.
+# If the database types are not up to date, the workflow will fail and notify the team.
+#
+# Docs: https://supabase.com/docs/guides/deployment/managing-environments?queryGroups=environment&environment=ci#configure-github-actions
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: ${{ false }} # <- This make sure the workflow is skipped without any alert
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start Supabase local development setup
+        run: supabase db start
+
+      - name: Verify generated types are checked in
+        run: |
+          supabase gen types typescript --local > types.gen.ts
+          if ! git diff --ignore-space-at-eol --exit-code --quiet types.gen.ts; then
+            echo "Detected uncommitted changes after build. See status below:"
+            git diff
+            exit 1
+          fi
