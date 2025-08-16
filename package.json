@@ -1,17 +1,15 @@
 {
   "license": "MIT",
   "scripts": {
-    "dev": "supabase start",
-    "start": "supabase start",
-    "stop": "supabase stop",
-    "status": "supabase status",
-    "db:push": "supabase db push",
+    "dev": "npx supabase start",
+    "start": "npx supabase start",
+    "stop": "npx supabase stop",
+    "status": "npx supabase status",
+    "db:push": "npx supabase db push",
     "update-types": "bash scripts/update-types.sh"
   },
   "dependencies": {
     "supabase": "^2.34.3"
   },
-  "devDependencies": {
-    "dotenv-cli": "^7.4.1"
-  }
+  "devDependencies": {}
 }
