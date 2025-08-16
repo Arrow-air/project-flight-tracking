@@ -24,4 +24,6 @@ ignorePaths:
   - "out"
   - "coverage"
   - "src/*.plan"
+  - "supabase/**" # Don't spell check Supabase code
+  - "frontend/**" # Don't spell check frontend code
 noConfigSearch: true

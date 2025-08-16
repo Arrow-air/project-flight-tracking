@@ -154,7 +154,6 @@ export async function updateFlightNote(id: string, input: UpdateFlightNoteInput)
 			.from(ENTITY_NAME)
 			.update(payload)
 			.eq('id', id)
-			.eq('author_id', authStore.userId)
 			.select('*')
 			.single()
 

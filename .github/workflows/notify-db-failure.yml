@@ -21,6 +21,7 @@ on:
 
 jobs:
   failed:
+    if: ${{ false }} # <- This make sure the workflow is skipped without any alert
     runs-on: ubuntu-latest
     steps:
       - uses: fountainhead/action-wait-for-check@v1.2.0

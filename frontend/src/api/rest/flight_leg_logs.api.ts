@@ -149,11 +149,8 @@ export async function uploadFlightLog(
 	let checksumSha256: string | null = null;
 
 	const result = await withErrorHandling(async () => {
-		try {
-			checksumSha256 = await computeSha256Hex(file)
-		} catch (_e) {
-			checksumSha256 = null
-		}
+		try { checksumSha256 = await computeSha256Hex(file); } 
+		catch (_e) { checksumSha256 = null; }
 
 		const { error: uploadError } = await supabase
 			.storage
