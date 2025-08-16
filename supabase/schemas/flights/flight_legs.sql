@@ -37,3 +37,19 @@ CREATE TRIGGER set_updated_at_flight_run
   BEFORE UPDATE ON public.flight_legs
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all flight legs
+--  - UPDATE any flight leg
+-- This is in addition to existing owner-scoped policies above.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view flight legs" ON public.flight_legs
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update flight legs" ON public.flight_legs
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);

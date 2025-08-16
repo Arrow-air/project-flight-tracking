@@ -39,3 +39,19 @@ CREATE TRIGGER set_updated_at_flight_leg_logs
   BEFORE UPDATE ON public.flight_leg_logs
   FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
+
+
+-- =============================================================
+-- ADDED PRIVILEGES (broad access)
+-- The following policies allow ANY authenticated user to:
+--  - VIEW all flight leg logs metadata
+--  - UPDATE any flight leg log metadata
+-- Note: Storage object access is governed by storage policies.
+-- =============================================================
+
+CREATE POLICY "All authenticated can view flight leg logs" ON public.flight_leg_logs
+FOR SELECT TO authenticated USING (true);
+
+CREATE POLICY "All authenticated can update flight leg logs" ON public.flight_leg_logs
+FOR UPDATE TO authenticated USING (true)
+WITH CHECK (true);
