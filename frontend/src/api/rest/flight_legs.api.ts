@@ -83,7 +83,6 @@ export async function listFlightLegs(options: {
 		let query = supabase
 			.from(ENTITY_NAME)
 			.select('*, user_profiles(full_name)')
-			.eq('pilot_id', authStore.userId)
 			.order('created_at', { ascending: options.order === 'asc' ? true : false })
 
 		if (options.aircraftId) {
@@ -110,7 +109,6 @@ export async function getFlightLeg(id: string): Promise<FlightLegData> {
 			.from(ENTITY_NAME)
 			.select('*, user_profiles(full_name)')
 			.eq('id', id)
-			.eq('pilot_id', authStore.userId)
 			.single()
 
 		if (error) throw error
@@ -174,7 +172,6 @@ export async function updateFlightLeg(id: string, input: UpdateFlightLegInput): 
 			.from(ENTITY_NAME)
 			.update(payload)
 			.eq('id', id)
-			.eq('pilot_id', authStore.userId)
 			.select('*')
 			.single()
 
@@ -198,7 +195,6 @@ export async function deleteFlightLeg(id: string): Promise<void> {
 			.from(ENTITY_NAME)
 			.delete()
 			.eq('id', id)
-			.eq('pilot_id', authStore.userId)
 
 		if (error) throw error
 	}, { operation, entity: ENTITY_NAME, authStore })
