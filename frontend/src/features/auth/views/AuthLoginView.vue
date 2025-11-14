@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/features/auth/auth.store';
 
 // Record the user's login state
 const authStore = useAuthStore();
@@ -75,5 +75,6 @@ async function handleLogin() {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+</style>
 

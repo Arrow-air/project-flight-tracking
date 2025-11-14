@@ -2,13 +2,13 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 
 import App from "./App.vue";
-import router from './router';
-import { logViteEnvironment } from "./config";
+import router from './router.ts';
+// import { logViteEnvironment } from "./config";
 
 import "./style.css";
 
 
-logViteEnvironment();
+// logViteEnvironment();
 
 const app = createApp(App);
 

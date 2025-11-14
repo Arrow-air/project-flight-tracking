@@ -1,8 +1,9 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
+import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import router from '@/router';
-import type { User, Session } from '@supabase/supabase-js';
+import * as authApi from './auth.api';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -17,32 +18,22 @@ export const useAuthStore = defineStore('auth', () => {
   const userEmail = computed<string>(() => user.value?.email || '');
   const userId = computed<string>(() => user.value?.id || '');
 
-  const getURL = () => {  
-    let url = 
-      import.meta.env.VITE_SUPABASE_URL ?? // site URL in production env.
-      import.meta.env.VITE_VERCEL_URL ?? // Automatically set by Vercel.
-      window.location.origin ?? // Wherever the user is
-      'http://localhost:3000/';
-    url = url.startsWith('http') ? url : `https://${url}`;
-    url = url.endsWith('/') ? url : `${url}/`;
-    return url;
-  }
-
   // Actions
   async function initialize(): Promise<void> {
     try {
       loading.value = true;
 
-      const { data: { session: initialSession }, error } = await supabase.auth.getSession();
-      if (error) {
+      const { session: initialSession } = await authApi.getSession();
+      if (initialSession) {
+        session.value = initialSession as Session;
+        user.value = initialSession.user as User;
+      } else {
         // Clear any stale local state
         user.value = null;
         session.value = null;
-      } else if (initialSession) {
-        session.value = initialSession as Session;
-        user.value = initialSession.user as User;
       }
 
+      // Set up auth state change listener for reactive updates
       supabase.auth.onAuthStateChange(async (event, newSession) => {
         const wasAuthenticated = !!user.value;
 
@@ -72,11 +63,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function login(email: string, password: string): Promise<void> {
     try {
       loading.value = true;
-      const { error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
-      if (error) throw error;
+      const { user: authUser, session: authSession } = await authApi.login({email, password});
+      if (authUser && authSession) {
+        user.value = authUser;
+        session.value = authSession as Session;
+      }
     } finally {
       loading.value = false;
     }
@@ -85,15 +76,16 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(email: string, password: string, fullName?: string): Promise<void> {
     try {
       loading.value = true;
-      const { error } = await supabase.auth.signUp({
-        email: email.trim(),
+      const { user: authUser, session: authSession } = await authApi.register({
+        email,
         password,
-        options: { 
-          data: { full_name: fullName },
-          emailRedirectTo: `${getURL()}`,
-        },
+        fullName,
       });
-      if (error) throw error;
+      // Update state from API response
+      if (authUser && authSession) {
+        user.value = authUser;
+        session.value = authSession;
+      }
     } finally {
       loading.value = false;
     }
@@ -102,7 +94,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout(): Promise<void> {
     try {
       loading.value = true;
-      await supabase.auth.signOut();
+      await authApi.logout();
     } finally {
       user.value = null;
       session.value = null;
@@ -114,10 +106,10 @@ export const useAuthStore = defineStore('auth', () => {
   async function resetPassword(email: string): Promise<void> {
     try {
       loading.value = true;
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      await authApi.resetPassword({
+        email,
         redirectTo: `${window.location.origin}/reset-password`,
       });
-      if (error) throw error;
     } finally {
       loading.value = false;
     }
@@ -126,8 +118,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function updatePassword(newPassword: string): Promise<void> {
     try {
       loading.value = true;
-      const { error } = await supabase.auth.updateUser({ password: newPassword });
-      if (error) throw error;
+      const { user: authUser } = await authApi.updatePassword({ newPassword });
+      // Update user state if returned
+      if (authUser) {
+        user.value = authUser;
+      }
     } finally {
       loading.value = false;
     }

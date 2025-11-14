@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuthStore } from '@/features/auth/auth.store'
 
 const ENTITY_NAME = 'flight_notes'
 

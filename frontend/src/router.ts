@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.store';
+import { useAuthStore } from '@/features/auth/auth.store';
+
+import { authRoutes } from '@/features/auth/auth.routes';
 
 const routes: Array<RouteRecordRaw> = [
-    // Auth routes
-    { path: '/login', name: 'Login', component: () => import('../views/auth/Login.vue'), meta: { requiresAuth: false } },
-    { path: '/signup', name: 'Signup', component: () => import('../views/auth/Signup.vue'), meta: { requiresAuth: false } },
-    { path: '/forgot-password', name: 'ForgotPassword', component: () => import('../views/auth/ForgotPassword.vue'), meta: { requiresAuth: false } },
-    { path: '/reset-password', name: 'ResetPassword', component: () => import('../views/auth/ResetPassword.vue'), meta: { requiresAuth: false } },
+
+    // Auth routes (no layout)
+    ...authRoutes,
 
     // App with default layout
     {
