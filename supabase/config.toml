@@ -73,7 +73,9 @@ schema_paths = [
 enabled = true
 # Specifies an ordered list of seed files to load during db reset.
 # Supports glob patterns relative to supabase directory: "./seeds/*.sql"
-sql_paths = ["./seed.sql"]
+sql_paths = [
+  "./seeds/seed.sql"
+]
 
 [db.network_restrictions]
 # Enable management of network restrictions.
@@ -116,7 +118,7 @@ port = 54324
 [storage]
 enabled = true
 # The maximum file size allowed (e.g. "5MB", "500KB").
-file_size_limit = "50MiB"
+file_size_limit = "250MiB"
 
 # Image transformation API is available to Supabase Pro plan.
 # [storage.image_transformation]
@@ -140,9 +142,9 @@ allowed_mime_types = [
   "application/x-log",          # .log files
   "application/x-mavlink-log",  # MAVLink logs
   "application/x-apj",          # .apj parameter files
-  "application/x-binary"        # Generic binary
+  "application/x-binary",       # Generic binary
 ]
-objects_path = "./storage/flight_logs"
+objects_path = "./seeds/storage/flight_logs"
 
 
 [auth]

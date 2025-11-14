@@ -7,7 +7,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "dev:staging": "vite --mode staging",
+    "dev:production": "vite --mode production",
+    "build": "vue-tsc -b && vite build --mode ${VITE_BUILD_MODE:-production}",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -16,7 +18,8 @@
     "axios": "^1.11.0",
     "pinia": "^3.0.3",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1"
+    "vue-router": "^4.5.1",
+    "vite-plugin-dotenvx": "github:javelina-works/vite-plugin-dotenvx#dist-build"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
