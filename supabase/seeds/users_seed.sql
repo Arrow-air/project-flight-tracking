@@ -39,9 +39,9 @@ INSERT INTO "auth"."mfa_amr_claims" ("session_id", "created_at", "updated_at", "
 --
 -- Data for Name: organizations; Type: TABLE DATA; Schema: public; Owner: postgres
 --
-INSERT INTO "public"."organizations" ("id", "name", "description", "email", "date_created", "date_updated") VALUES
-	('550e8400-e29b-41d4-a716-446655440001', 'Acme Land Management', 'Professional land clearing and management services', 'atilla.istami@gmail.com', '2025-07-22 16:20:35.709377+00', '2025-07-22 16:20:35.709377+00'),
-	('550e8400-e29b-41d4-a716-446655440002', 'Green Valley Properties', 'Sustainable property development and maintenance', 'kjcerveny@gmail.com', '2025-07-22 16:20:35.709377+00', '2025-07-22 16:20:35.709377+00');
+-- INSERT INTO "public"."organizations" ("id", "name", "description", "email", "date_created", "date_updated") VALUES
+-- 	('550e8400-e29b-41d4-a716-446655440001', 'Acme Land Management', 'Professional land clearing and management services', 'atilla.istami@gmail.com', '2025-07-22 16:20:35.709377+00', '2025-07-22 16:20:35.709377+00'),
+-- 	('550e8400-e29b-41d4-a716-446655440002', 'Green Valley Properties', 'Sustainable property development and maintenance', 'kjcerveny@gmail.com', '2025-07-22 16:20:35.709377+00', '2025-07-22 16:20:35.709377+00');
 
 
 --
