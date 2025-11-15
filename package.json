@@ -1,6 +1,21 @@
 {
   "license": "MIT",
+  "scripts": {
+    "seed": "npx tsx scripts/snaplet/seed.ts",
+    "seed:sync": "npx @snaplet/seed sync",
+    "seed:init": "npx @snaplet/seed init ./scripts/snaplet"
+  },
   "dependencies": {
     "supabase": "^2.34.3"
+  },
+  "devDependencies": {
+    "@snaplet/copycat": "^6.0.0",
+    "@snaplet/seed": "0.98.0",
+    "@types/pg": "^8.15.6",
+    "pg": "^8.16.3",
+    "tsx": "^4.20.6"
+  },
+  "@snaplet/seed": {
+    "config": "scripts/snaplet/seed.config.ts"
   }
 }
