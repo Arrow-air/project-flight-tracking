@@ -1,14 +1,15 @@
-import type { FormatChar } from "./constants.ts";
+import { FMT_TYPE_ID, type FormatChar } from "./constants.ts";
 import { parseField, sizeOfFormatChar } from "./binary.ts";
-import type { FormatDefinition } from "./types.ts";
+import type { FmtRecord, FormatDefinition } from "./types.ts";
 
-export interface FmtRecord {
-  typeId: number;
-  length: number;
-  name: string;
-  format: string;
-  columns: string;
-}
+
+export const DEFAULT_FMT_RECORD: FmtRecord = {
+  typeId: FMT_TYPE_ID,
+  length: 89,
+  name: "FMT",
+  format: "BBnNZ",
+  columns: "Type,Length,Name,Format,Columns",
+};
 
 export function parseFmtRecord(
   view: DataView,
