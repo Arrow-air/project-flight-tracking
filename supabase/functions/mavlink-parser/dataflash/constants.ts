@@ -25,24 +25,30 @@ export const DF_HEADER_LENGTH = 3; // The length of the header (in bytes).
 export const FMT_TYPE_ID = 128; // Decimal 128
 
 
-export type FormatChar =
-  | "a"
-  | "b"
-  | "B"
-  | "h"
-  | "H"
-  | "i"
-  | "I"
-  | "f"
-  | "d"
-  | "Q"
-  | "q"
-  | "n"
-  | "N"
-  | "Z"
-  | "c"
-  | "C"
-  | "E"
-  | "e"
-  | "L"
-  | "M";
+// Keys: format characters (letters).
+// Values: size of the field in bytes.
+// Used to interpret the binary data in the log.
+export const FORMAT_CHAR_SIZE = {
+  a: 64,   // int16_t[32]
+  b: 1,    // Int8
+  B: 1,    // Uint8
+  c: 2,    // Int16 / 100
+  C: 2,    // Uint16 / 100
+  d: 8,    // Float64
+  e: 4,    // Int32 / 100
+  E: 4,    // Uint32 / 100
+  f: 4,    // Float32
+  h: 2,    // Int16
+  H: 2,    // Uint16
+  i: 4,    // Int32
+  I: 4,    // Uint32
+  L: 4,    // Int32 (latitude/longitude)
+  M: 1,    // Uint8 (flight mode)
+  n: 4,    // char[4]
+  N: 16,   // char[16]
+  q: 8,    // Int64
+  Q: 8,    // Uint64 
+  Z: 64,   // char[64]
+} as const satisfies Record<string, number>;
+
+export type FormatChar = keyof typeof FORMAT_CHAR_SIZE;

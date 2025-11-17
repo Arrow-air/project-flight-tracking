@@ -34,7 +34,8 @@ function printSummary(parsed: ParsedLog, selected: string[]): void {
   printMessageInfo(parsed, selected);
   
   // Print the message type info.
-  printMessageTypeInfo(parsed, false, 0);
+  const printAllMessageTypes = true;
+  printMessageTypeInfo(parsed, printAllMessageTypes, 0);
 
 }
 

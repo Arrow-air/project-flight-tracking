@@ -15,15 +15,20 @@ export function parseFmtRecord(
   view: DataView,
   offset: number,
 ): FmtRecord {
-  let cursor = offset;
+  const cursor = offset;
+  
   const [typeIdRaw, nextAfterType] = parseField(view, cursor, "B");
   const typeId = ensureNumber(typeIdRaw, "Type");
+
   const [lengthRaw, nextAfterLength] = parseField(view, nextAfterType, "B");
   const length = ensureNumber(lengthRaw, "Length");
+
   const [nameRaw, nextAfterName] = parseField(view, nextAfterLength, "n");
   const name = ensureString(nameRaw, "Name");
+
   const [formatRaw, nextAfterFormat] = parseField(view, nextAfterName, "N");
   const format = ensureString(formatRaw, "Format");
+
   const [columnsRaw] = parseField(view, nextAfterFormat, "Z");
   const columns = ensureString(columnsRaw, "Columns");
 

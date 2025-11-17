@@ -1,27 +1,8 @@
 import type { FormatChar } from "./constants.ts";
+import { FORMAT_CHAR_SIZE } from "./constants.ts";
 
-export const FORMAT_CHAR_SIZE: Record<FormatChar, number> = {
-  a: 64,
-  b: 1,
-  B: 1,
-  c: 2,
-  C: 2,
-  d: 8,
-  E: 4,
-  e: 4,
-  f: 4,
-  h: 2,
-  H: 2,
-  i: 4,
-  I: 4,
-  L: 4,
-  M: 1,
-  n: 4,
-  N: 16,
-  q: 8,
-  Q: 8,
-  Z: 64,
-};
+type FieldValue = number | string | number[];
+
 
 export function sizeOfFormatChar(ch: FormatChar): number {
   const size = FORMAT_CHAR_SIZE[ch];
@@ -31,13 +12,24 @@ export function sizeOfFormatChar(ch: FormatChar): number {
   return size;
 }
 
-type FieldValue = number | string | number[];
-
+/**
+ * Parse a field from the binary data.
+ * Returns the value and the new offset.
+ * @param view - The DataView to parse from.
+ * @param offset - The offset to start parsing from.
+ * @param ch - The format character to parse.
+ * @returns The value and the new offset.
+ * @throws An error if the format character is unknown.
+ */
 export function parseField(
   view: DataView,
   offset: number,
   ch: FormatChar,
 ): [FieldValue, number] {
+
+  // Used to join two 32-bit integers into a 64-bit integer.
+  const UINT32_RANGE = 2 ** 32; // 4294967296
+
   switch (ch) {
     case "a": {
       const values = new Array<number>(32);
@@ -84,15 +76,15 @@ export function parseField(
     case "Q": {
       const low = view.getUint32(offset, true);
       const high = view.getUint32(offset + 4, true);
-      const value = high * 4294967296 + low;
+      const value = high * UINT32_RANGE + low;
       return [value, offset + 8];
     }
     case "q": {
       const low = view.getInt32(offset, true);
       const high = view.getInt32(offset + 4, true);
-      let value = high * 4294967296 + low;
+      let value = high * UINT32_RANGE + low;
       if (low < 0) {
-        value += 4294967296;
+        value += UINT32_RANGE;
       }
       return [value, offset + 8];
     }
