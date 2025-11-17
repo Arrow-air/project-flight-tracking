@@ -1,9 +1,6 @@
 import { DataflashParserTS } from "./dataflash/parser.ts";
 import type { ParsedLog, ParsedMessage } from "./dataflash/types.ts";
-
-export function parseDataflashLog(buf: Uint8Array, selectedMessages?: string[]) {
-  return new DataflashParserTS(buf.buffer as ArrayBuffer).parse(selectedMessages);
-}
+import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
 
 if (import.meta.main) {
   const run = async () => {
@@ -20,9 +17,18 @@ if (import.meta.main) {
       selectedMessages.length > 0 ? selectedMessages : undefined,
     );
     printSummary(parsed, selectedMessages);
+
+    const extractor = DataflashDataExtractor.fromBuffer(fileBytes, {
+      selectedMessages: selectedMessages.length > 0 ? selectedMessages : undefined,
+    });
+    printParams(extractor);
   };
 
   await run();
+}
+
+export function parseDataflashLog(buf: Uint8Array, selectedMessages?: string[]) {
+  return new DataflashParserTS(buf.buffer as ArrayBuffer).parse(selectedMessages);
 }
 
 function printSummary(parsed: ParsedLog, selected: string[]): void {
@@ -119,4 +125,27 @@ function getSampleRecord(message: ParsedMessage): Record<string, unknown> {
     sample[field] = values?.[0];
   }
   return sample;
+}
+
+function printParams(extractor: DataflashDataExtractor): void {
+  const { params, defaults } = extractor.extractParamsSummary();
+  console.log("\nPARAM values:");
+  if (params.length === 0) {
+    console.log("- none found");
+  } else {
+    for (const p of params) {
+      console.log(
+        `- ${p.name} = ${p.value}${p.timeUs !== undefined ? ` @${p.timeUs}` : ""}`,
+      );
+    }
+  }
+
+  console.log("\nDefault PARAM values:");
+  if (defaults.length === 0) {
+    console.log("- none found");
+  } else {
+    for (const d of defaults) {
+      console.log(`- ${d.name} = ${d.defaultValue}`);
+    }
+  }
 }
