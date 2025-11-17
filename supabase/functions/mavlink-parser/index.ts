@@ -1,5 +1,10 @@
 import { DataflashParserTS } from "./dataflash/parser.ts";
-import type { ParsedLog, ParsedMessage } from "./dataflash/types.ts";
+import type { 
+  MessageTypeId, MessageTypeName, MessageFieldName, 
+  FormatDefinition, FieldArray,
+  MessageTypeInfo, 
+  ParsedLog, ParsedMessage, 
+} from "./dataflash/types.ts";
 import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
 
 if (import.meta.main) {
@@ -16,7 +21,9 @@ if (import.meta.main) {
       fileBytes,
       selectedMessages.length > 0 ? selectedMessages : undefined,
     );
-    printSummary(parsed, selectedMessages);
+
+
+    // printSummary(parsed, selectedMessages);
 
     const extractor = DataflashDataExtractor.fromBuffer(fileBytes, {
       selectedMessages: selectedMessages.length > 0 ? selectedMessages : undefined,
@@ -33,13 +40,13 @@ export function parseDataflashLog(buf: Uint8Array, selectedMessages?: string[]) 
 
 function printSummary(parsed: ParsedLog, selected: string[]): void {
 
-  // Print the format table.
+  // // Print the format table.
   printFormatTable(parsed, 1);
 
   // Print the message info.
   printMessageInfo(parsed, selected);
   
-  // Print the message type info.
+  // // Print the message type info.
   const printAllMessageTypes = true;
   printMessageTypeInfo(parsed, printAllMessageTypes, 0);
 
@@ -47,7 +54,7 @@ function printSummary(parsed: ParsedLog, selected: string[]): void {
 
 
 function printFormatTable(parsed: ParsedLog, printTop: number = 5): void {
-  const formatTable = parsed.formatTable;
+  const formatTable: Record<MessageTypeId, FormatDefinition> = parsed.formatTable;
   console.log("\nFormat table summary:");
   console.log(`Number of format table entries: ${Object.keys(formatTable).length}`);
 
@@ -69,7 +76,7 @@ function printMessageTypeInfo(parsed: ParsedLog, printKeys: boolean = false, pri
 
   // Print the keys of the messageTypes object
   if (printKeys) {
-    for (const [messageTypeName, messageTypeInfo] of Object.entries(messageTypes)) {
+    for (const [messageTypeName, messageTypeInfo] of Object.entries(messageTypes) as [MessageTypeName, MessageTypeInfo][]) {
       console.log(`- ${messageTypeName}: ${messageTypeInfo.offsetArray.length} messages`);
     }
   }
@@ -100,14 +107,14 @@ function printMessageInfo(parsed: ParsedLog, selected: string[]): void {
     return;
   }
 
-  for (const name of sampleNames) {
+  for (const name of sampleNames as MessageTypeName[]) {
     const msg = parsed.messages[name];
     if (!msg) {
       console.log(`- ${name}: not found in log`);
       continue;
     }
     const recordCount = getRecordCount(msg);
-    const sample = getSampleRecord(msg);
+    const sample: Record<MessageFieldName, unknown> = getSampleRecord(msg);
     console.log(`- ${name}: ${recordCount} records`);
     console.log(`  sample -> ${JSON.stringify(sample)}`);
   }
@@ -119,8 +126,8 @@ function getRecordCount(message: ParsedMessage): number {
   return field ? field.length : 0;
 }
 
-function getSampleRecord(message: ParsedMessage): Record<string, unknown> {
-  const sample: Record<string, unknown> = {};
+function getSampleRecord(message: ParsedMessage): Record<MessageFieldName, unknown> {
+  const sample: Record<MessageFieldName, unknown> = {};
   for (const [field, values] of Object.entries(message)) {
     sample[field] = values?.[0];
   }

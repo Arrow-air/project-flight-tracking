@@ -17,6 +17,7 @@ export interface ParamsSummary {
   defaults: DefaultParamRecord[];
 }
 
+
 export class ParamExtractor implements Extractor<"params", ParamRecord[]> {
   extract(ctx: ExtractionContext): ExtractionResult<"params", ParamRecord[]> | null {
     const { parsed } = ctx;

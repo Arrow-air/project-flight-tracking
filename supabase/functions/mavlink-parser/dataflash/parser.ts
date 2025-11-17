@@ -2,12 +2,12 @@ import { DF_HEADER1, DF_HEADER2, DF_HEADER_LENGTH, FMT_TYPE_ID } from "./constan
 import type { FormatChar } from "./constants.ts";
 import { parseField } from "./binary.ts";
 import type {
+  MessageTypeId, MessageTypeName,
   FieldArray,
   MessageTypeInfo,
   ParsedLog,
   ParsedMessage,
-  FmtRecord,
-  FormatDefinition,
+  FmtRecord,FormatDefinition,
 } from "./types.ts";
 import { buildFormatDefinition, parseFmtRecord } from "./fmt.ts";
 // import { assert } from "node:assert";
@@ -25,10 +25,10 @@ const DEFAULT_FMT_RECORD: FmtRecord = {
 export class DataflashParserTS {
   private readonly buffer: ArrayBufferLike; // The buffer containing the loaded dataflash log.
   private readonly view: DataView; // The data view of the buffer.
-  private readonly formatTable: Record<number, FormatDefinition>; // { typeId: FormatDefinition }.
-  private readonly offsetsByType: Record<number, number[]>; // { typeId: number[] }.
-  private readonly messages: Record<string, ParsedMessage>; // { messageName: ParsedMessage }.
-  private messageTypes: Record<string, MessageTypeInfo>; // { messageTypeName: MessageTypeInfo }.
+  private readonly formatTable: Record<MessageTypeId, FormatDefinition>; // { typeId: FormatDefinition }.
+  private readonly offsetsByType: Record<MessageTypeId, number[]>; // { typeId: offsets[] }.
+  private readonly messages: Record<MessageTypeName, ParsedMessage>; // { messageName: ParsedMessage }.
+  private messageTypes: Record<MessageTypeName, MessageTypeInfo>; // { messageTypeName: MessageTypeInfo }.
   private scanned = false; // Whether the log has been scanned.
 
   constructor(buffer: ArrayBufferLike) {
@@ -48,12 +48,12 @@ export class DataflashParserTS {
    * @param selectedMessages - The messages to parse. If not provided, all messages will be parsed.
    * @returns The parsed data.
    */
-  parse(selectedMessages?: string[]): ParsedLog {
+  parse(selectedMessages?: MessageTypeName[]): ParsedLog {
     // Build the format table and message types.
     this.scanLog();
 
     // Parse the selected message types, if provided. Otherwise, parse all message types.
-    const targetNames = selectedMessages ?? Object.keys(this.messageTypes);
+    const targetNames: MessageTypeName[] = selectedMessages ?? Object.keys(this.messageTypes) as MessageTypeName[];
     for (const name of targetNames) {
       const info = this.messageTypes[name];
       if (!info) {
@@ -127,7 +127,7 @@ export class DataflashParserTS {
       }
 
       // Not FMT, so we move to the next message.
-      const definition = this.formatTable[typeId];
+      const definition: FormatDefinition | undefined = this.formatTable[typeId];
       if (definition) {
         cursor = payloadOffset + definition.totalLength;
       } else { cursor = payloadOffset; }
@@ -135,7 +135,7 @@ export class DataflashParserTS {
 
     // [4] Traversed all messages, now build the message types.
     const messageTypes: Record<string, MessageTypeInfo> = {};
-    for (const definition of Object.values(this.formatTable)) {
+    for (const definition of Object.values(this.formatTable) as FormatDefinition[]) {
       // Get the offsets for this message type.
       const offsets = (this.offsetsByType[definition.typeId] ?? []).filter(
         (offset) => offset + definition.totalLength <= logLength,
@@ -157,13 +157,13 @@ export class DataflashParserTS {
    * @param nameOverride - The name of the message to decode. If not provided, the message name will be used.
    * @returns void
    */
-  private decodeMessagesOfType(info: MessageTypeInfo, nameOverride?: string): void {
+  private decodeMessagesOfType(info: MessageTypeInfo, nameOverride?: MessageTypeName): void {
     const offsets = info.offsetArray;
     if (offsets.length === 0) {
       return; // No messages of this type, so exit.
     }
 
-    const messageName = nameOverride ?? info.name;
+    const messageName: MessageTypeName = nameOverride ?? info.name;
     const fieldCount = info.format.length;
     const result: ParsedMessage = {};
 

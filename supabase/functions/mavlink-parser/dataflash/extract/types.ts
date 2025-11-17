@@ -1,5 +1,6 @@
 import type { ParsedLog } from "../types.ts";
 
+
 export interface ExtractionContext {
   parsed: ParsedLog;
 }
