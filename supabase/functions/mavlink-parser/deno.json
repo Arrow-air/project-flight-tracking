@@ -1,8 +1,9 @@
 {
   "tasks": {
-    "dev": "deno run --watch main.ts"
+    "dev": "deno run --watch index.ts"
   },
   "imports": {
+    "supabaseAdmin": "../_shared/supabaseAdmin.ts",
     "@std/assert": "jsr:@std/assert@1",
     "node-mavlink": "npm:node-mavlink@^2.3.0"
   }

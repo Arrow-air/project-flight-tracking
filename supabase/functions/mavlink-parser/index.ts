@@ -7,31 +7,106 @@ import type {
 } from "./dataflash/types.ts";
 import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
 
-if (import.meta.main) {
-  const run = async () => {
-    const [logPath, ...selectedMessages] = Deno.args;
-    if (!logPath) {
-      console.error("Usage: deno run index.ts <path/to/log.bin> [MESSAGE ...]");
-      Deno.exit(1);
+import { supabaseAdmin } from "supabaseAdmin";
+import { getFlightLegLogs } from "../_shared/storage.ts";
+
+Deno.serve(async (req) => {
+  const url = new URL(req.url);
+  const flightLegId = url.searchParams.get('flightLegId');
+  if (!flightLegId) {
+    return new Response('Flight leg ID is required', { status: 400 });
+  }
+
+  try {
+    if (req.method !== "POST") {
+      return new Response("Method not allowed", { status: 405 });
     }
 
-    console.log(`Reading log: ${logPath}`);
-    const fileBytes = await Deno.readFile(logPath);
-    const parsed = parseDataflashLog(
-      fileBytes,
-      selectedMessages.length > 0 ? selectedMessages : undefined,
+    // const body = await req.json().catch(() => ({}));
+    // const flightLegId = body.flight_leg_id ?? body.flightLegId;
+
+    if (!flightLegId || typeof flightLegId !== "string") {
+      return new Response("Missing or invalid flight_leg_id", {
+        status: 400,
+      });
+    }
+
+    const logs = await getFlightLegLogs(flightLegId);
+
+    // 🔧 Placeholder: do your real parsing here.
+    // For now, we just summarize the files.
+    const summary = logs.map((log) => ({
+      path: log.path,
+      name: log.name,
+      size_bytes: log.bytes.length,
+      
+    }));
+
+    return new Response(
+      JSON.stringify({
+        flight_leg_id: flightLegId,
+        log_count: logs.length,
+        logs: summary,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
     );
+  } catch (err) {
+    console.error(err);
+    return new Response(
+      JSON.stringify({ error: (err as Error).message ?? "Unknown error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+});
 
 
-    // printSummary(parsed, selectedMessages);
+// if (import.meta.main) {
+//   const run = async () => {
+//     const [logPath, ...selectedMessages] = Deno.args;
+//     let logPathToUse = logPath;
+//     if (!logPath) {
+//       // console.error("Usage: deno run index.ts <path/to/log.bin> [MESSAGE ...]");
+//       // Deno.exit(1);
+      
+//       const DEFAULT_LOG_PATH = "./test12.bin";
+//       console.log("Using default log path: ${DEFAULT_LOG_PATH}");
+//       logPathToUse = DEFAULT_LOG_PATH;
+//     }
 
-    const extractor = DataflashDataExtractor.fromBuffer(fileBytes, {
-      selectedMessages: selectedMessages.length > 0 ? selectedMessages : undefined,
-    });
-    printParams(extractor);
-  };
+//     console.log(`Reading log: ${logPathToUse}`);
+//     const fileBytes = await Deno.readFile(logPathToUse);
+//     const parsed = parseDataflashLog(
+//       fileBytes,
+//       selectedMessages.length > 0 ? selectedMessages : undefined,
+//     );
 
-  await run();
+
+//     // printSummary(parsed, selectedMessages);
+
+//     const extractor = DataflashDataExtractor.fromBuffer(fileBytes, {
+//       selectedMessages: selectedMessages.length > 0 ? selectedMessages : undefined,
+//     });
+//     printParams(extractor);
+//   };
+
+//   await run();
+// }
+
+
+async function fetchLogsFromSupabase(flightLegId: string): Promise<ParsedLog[]> {
+  const { data, error } = await supabaseAdmin
+    .from('flight_leg_logs')
+    .select('*')
+    .eq('flight_leg_id', flightLegId);
+  if (error) throw error;
+
+  return data;
 }
 
 export function parseDataflashLog(buf: Uint8Array, selectedMessages?: string[]) {
