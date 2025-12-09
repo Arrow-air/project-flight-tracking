@@ -1,17 +1,12 @@
 import { DataflashParserTS } from "./dataflash/parser.ts";
 import type {
-  MessageTypeId,
-  MessageTypeName,
-  MessageFieldName,
-  FormatDefinition,
-  MessageTypeInfo,
-  ParsedLog,
-  ParsedMessage,
+  MessageTypeId, MessageTypeName, MessageTypeInfo,
+  MessageFieldName, FormatDefinition, ParsedLog, ParsedMessage,
 } from "./dataflash/types.ts";
-import {
-  DataflashDataExtractor,
-} from "./dataflash/extract/index.ts";
+
+import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
 import type { ParamSummaryRecord } from "./dataflash/extract/params.ts";
+
 import { getFlightLegLogs, type FlightLogFile } from "storage";
 
 
@@ -28,7 +23,10 @@ Deno.serve(async (req) => {
       return new Response("Method not allowed", { status: 405 });
     }
 
+    // Fetch flight leg logs from storage
     const logs = await getFlightLegLogs(flightLegId);
+
+    // Perform analysis on each log
     const analyses = logs.map(analyzeLogParams);
     const payload = { flightLegId, analyses };
 
@@ -38,6 +36,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error(err);
+    
     return new Response(
       JSON.stringify({ error: (err as Error).message ?? "Unknown error" }),
       {
