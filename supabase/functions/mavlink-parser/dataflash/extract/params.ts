@@ -9,13 +9,13 @@ export interface ParamRecord {
 
 export interface DefaultParamRecord {
   name: string;
-  defaultValue: number;
+  defaultValue: number | undefined;
 }
 
 export interface ParamSummaryRecord {
   name: string;
   value?: number;
-  default_value?: number;
+  default_value?: number | undefined;
   timeUs?: number; // time assigned in this log
 }
 

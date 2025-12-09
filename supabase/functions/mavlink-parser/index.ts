@@ -3,8 +3,8 @@ import { PARAM_MESSAGES } from "./df-analysis/index.ts";
 import { analyzeParamsBuffer, getLogParamsDiff } from "./df-analysis/params.ts";
 // import { printParsedLogSummary } from "./df-analysis/misc.ts";
 
-import { getFlightLegLogs, type FlightLogFile } from "storage";
-
+import { listFlightLegLogs } from "storage";
+import type { FlightLogHandle } from "storage";
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
@@ -19,16 +19,20 @@ Deno.serve(async (req) => {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    // 1) Fetch flight leg logs from storage
+    // 1) Fetch flight leg log handles from storage
     console.log("Fetching flight leg logs from storage");
-    const logs: FlightLogFile[] = await getFlightLegLogs(flightLegId);
+    const logs: FlightLogHandle[] = await listFlightLegLogs(flightLegId);
     console.log("Logs fetched from storage", logs.length);
 
     // Perform analysis on each log
     // const analyses = logs.map(analyzeLogParams);
     // const payload = { flightLegId, analyses };
 
-    const diff = getLogParamsDiff(logs);
+    const diff = await getLogParamsDiff(logs, {}, {
+      nonDefaultOnly: true,
+      logDiffOnly: false,
+      includeAutoUpdated: false,
+    });
     const payload = { flightLegId, diff };
 
     return new Response(JSON.stringify(payload), {
@@ -63,40 +67,40 @@ interface LogParamAnalysis {
   error?: string;
 }
 
-function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
-  try {
-    const { summary, nonDefaultParams, unchangedParams } = analyzeParamsBuffer(log.bytes, {
-      selectedMessages: [...PARAM_MESSAGES],
-    });
-    return {
-      path: log.path,
-      name: log.name,
-      sizeBytes: log.bytes.length,
-      sizeMB: Math.round(log.bytes.length / 1024 / 1024),
-      summary,
-      nonDefaultParams,
-      unchangedParams,
-      totalParamsCount: summary.length,
-      nonDefaultParamsCount: nonDefaultParams.length,
-      unchangedParamsCount: unchangedParams.length,
-    };
-  } catch (error) {
-    console.error(`Failed to extract params for ${log.name}`, error);
-    return {
-      path: log.path,
-      name: log.name,
-      sizeBytes: log.bytes.length,
-      sizeMB: Math.round(log.bytes.length / 1024 / 1024),
-      summary: [],
-      nonDefaultParams: [],
-      unchangedParams: [],
-      totalParamsCount: 0,
-      nonDefaultParamsCount: 0,
-      unchangedParamsCount: 0,
-      error: (error as Error).message ?? "Unknown parser error",
-    };
-  }
-}
+// function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
+//   try {
+//     const { summary, nonDefaultParams, unchangedParams } = analyzeParamsBuffer(log.bytes, {
+//       selectedMessages: [...PARAM_MESSAGES],
+//     });
+//     return {
+//       path: log.path,
+//       name: log.name,
+//       sizeBytes: log.bytes.length,
+//       sizeMB: Math.round(log.bytes.length / 1024 / 1024),
+//       summary,
+//       nonDefaultParams,
+//       unchangedParams,
+//       totalParamsCount: summary.length,
+//       nonDefaultParamsCount: nonDefaultParams.length,
+//       unchangedParamsCount: unchangedParams.length,
+//     };
+//   } catch (error) {
+//     console.error(`Failed to extract params for ${log.name}`, error);
+//     return {
+//       path: log.path,
+//       name: log.name,
+//       sizeBytes: log.bytes.length,
+//       sizeMB: Math.round(log.bytes.length / 1024 / 1024),
+//       summary: [],
+//       nonDefaultParams: [],
+//       unchangedParams: [],
+//       totalParamsCount: 0,
+//       nonDefaultParamsCount: 0,
+//       unchangedParamsCount: 0,
+//       error: (error as Error).message ?? "Unknown parser error",
+//     };
+//   }
+// }
 
 
 // if (import.meta.main) {
