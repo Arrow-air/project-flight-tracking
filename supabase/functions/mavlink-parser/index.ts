@@ -1,19 +1,27 @@
 import { DataflashParserTS } from "./dataflash/parser.ts";
-import type { 
-  MessageTypeId, MessageTypeName, MessageFieldName, 
-  FormatDefinition, FieldArray,
-  MessageTypeInfo, 
-  ParsedLog, ParsedMessage, 
+import type {
+  MessageTypeId,
+  MessageTypeName,
+  MessageFieldName,
+  FormatDefinition,
+  MessageTypeInfo,
+  ParsedLog,
+  ParsedMessage,
 } from "./dataflash/types.ts";
-import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
+import {
+  DataflashDataExtractor,
+  type ParamRecord,
+  type DefaultParamRecord,
+} from "./dataflash/extract/index.ts";
 
-import { supabaseAdmin } from "supabaseAdmin";
-import { getFlightLegLogs } from "../_shared/storage.ts";
+import { getFlightLegLogs, type FlightLogFile } from "storage";
+
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const flightLegId = url.searchParams.get('flightLegId');
-  if (!flightLegId) {
+
+  if (!flightLegId || typeof flightLegId !== "string") {
     return new Response('Flight leg ID is required', { status: 400 });
   }
 
@@ -22,37 +30,14 @@ Deno.serve(async (req) => {
       return new Response("Method not allowed", { status: 405 });
     }
 
-    // const body = await req.json().catch(() => ({}));
-    // const flightLegId = body.flight_leg_id ?? body.flightLegId;
-
-    if (!flightLegId || typeof flightLegId !== "string") {
-      return new Response("Missing or invalid flight_leg_id", {
-        status: 400,
-      });
-    }
-
     const logs = await getFlightLegLogs(flightLegId);
+    const analyses = logs.map(analyzeLogParams);
+    const payload = buildParamsResponse(flightLegId, analyses);
 
-    // 🔧 Placeholder: do your real parsing here.
-    // For now, we just summarize the files.
-    const summary = logs.map((log) => ({
-      path: log.path,
-      name: log.name,
-      size_bytes: log.bytes.length,
-      
-    }));
-
-    return new Response(
-      JSON.stringify({
-        flight_leg_id: flightLegId,
-        log_count: logs.length,
-        logs: summary,
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   } catch (err) {
     console.error(err);
     return new Response(
@@ -99,21 +84,125 @@ Deno.serve(async (req) => {
 // }
 
 
-async function fetchLogsFromSupabase(flightLegId: string): Promise<ParsedLog[]> {
-  const { data, error } = await supabaseAdmin
-    .from('flight_leg_logs')
-    .select('*')
-    .eq('flight_leg_id', flightLegId);
-  if (error) throw error;
-
-  return data;
-}
-
 export function parseDataflashLog(buf: Uint8Array, selectedMessages?: string[]) {
   return new DataflashParserTS(buf.buffer as ArrayBuffer).parse(selectedMessages);
 }
 
-function printSummary(parsed: ParsedLog, selected: string[]): void {
+const PARAM_MESSAGES = ["PARM", "PARAM_VALUE"];
+
+interface LogParamAnalysis {
+  path: string;
+  name: string;
+  sizeBytes: number;
+  params: ParamRecord[];
+  defaultParams: DefaultParamRecord[];
+  error?: string;
+}
+
+function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
+  try {
+    const extractor = DataflashDataExtractor.fromBuffer(log.bytes, {
+      selectedMessages: PARAM_MESSAGES,
+    });
+    const { params, defaults } = extractor.extractParamsSummary();
+    return {
+      path: log.path,
+      name: log.name,
+      sizeBytes: log.bytes.length,
+      params,
+      defaultParams: defaults,
+    };
+  } catch (error) {
+    console.error(`Failed to extract params for ${log.name}`, error);
+    return {
+      path: log.path,
+      name: log.name,
+      sizeBytes: log.bytes.length,
+      params: [],
+      defaultParams: [],
+      error: (error as Error).message ?? "Unknown parser error",
+    };
+  }
+}
+
+interface ParamKeySummary {
+  value?: number;
+  default_value?: number;
+  value_source_log?: string;
+  default_source_log?: string;
+}
+
+function buildParamsResponse(flightLegId: string, logs: LogParamAnalysis[]) {
+  return {
+    flight_leg_id: flightLegId,
+    log_count: logs.length,
+    params: {
+      by_key: buildParamsByKey(logs),
+    },
+    logs: logs.map(serializeLogAnalysis),
+  };
+}
+
+function buildParamsByKey(logs: LogParamAnalysis[]): Record<string, ParamKeySummary> {
+  const summary = new Map<string, ParamKeySummary>();
+
+  for (const log of logs) {
+    for (const record of log.params) {
+      const current = summary.get(record.name) ?? {};
+      // Latest value wins; since params rarely change this mostly grabs first.
+      summary.set(record.name, {
+        ...current,
+        value: record.value,
+        value_source_log: log.name,
+      });
+    }
+
+    for (const record of log.defaultParams) {
+      const current = summary.get(record.name) ?? {};
+      if (current.default_value === undefined) {
+        summary.set(record.name, {
+          ...current,
+          default_value: record.defaultValue,
+          default_source_log: log.name,
+        });
+      }
+    }
+  }
+
+  return Object.fromEntries(
+    Array.from(summary.entries()).sort(([a], [b]) => a.localeCompare(b)),
+  );
+}
+
+function serializeLogAnalysis(log: LogParamAnalysis) {
+  return {
+    path: log.path,
+    name: log.name,
+    size_bytes: log.sizeBytes,
+    params: log.params.map(serializeParamRecord),
+    default_params: log.defaultParams.map(serializeDefaultParamRecord),
+    param_count: log.params.length,
+    default_param_count: log.defaultParams.length,
+    error: log.error,
+  };
+}
+
+function serializeParamRecord(record: ParamRecord) {
+  return {
+    name: record.name,
+    value: record.value,
+    time_us: record.timeUs,
+  };
+}
+
+function serializeDefaultParamRecord(record: DefaultParamRecord) {
+  return {
+    name: record.name,
+    default_value: record.defaultValue,
+  };
+}
+
+function _printSummary(parsed: ParsedLog, selected: string[]): void {
 
   // // Print the format table.
   printFormatTable(parsed, 1);
@@ -209,7 +298,7 @@ function getSampleRecord(message: ParsedMessage): Record<MessageFieldName, unkno
   return sample;
 }
 
-function printParams(extractor: DataflashDataExtractor): void {
+function _printParams(extractor: DataflashDataExtractor): void {
   const { params, defaults } = extractor.extractParamsSummary();
   console.log("\nPARAM values:");
   if (params.length === 0) {

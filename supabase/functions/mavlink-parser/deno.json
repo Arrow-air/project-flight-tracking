@@ -3,6 +3,7 @@
     "dev": "deno run --watch index.ts"
   },
   "imports": {
+    "storage": "../_shared/storage.ts",
     "supabaseAdmin": "../_shared/supabaseAdmin.ts",
     "@std/assert": "jsr:@std/assert@1",
     "node-mavlink": "npm:node-mavlink@^2.3.0"
