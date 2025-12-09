@@ -1,17 +1,14 @@
 import { DataflashParserTS } from "../parser.ts";
 import type { ParsedLog, ParsedMessage } from "../types.ts";
+import { ParamExtractor, DefaultParamExtractor, ParamSummaryExtractor } from "./params.ts";
+import type { ParamRecord, DefaultParamRecord, ParamSummaryRecord } from "./params.ts";
 import {
   ModeExtractor,
   PositionExtractor,
-  DefaultParamExtractor,
-  ParamExtractor,
-  type ParamsSummary,
   type ModeExtractorOptions,
   type PositionExtractorOptions,
   type ModeRecord,
   type PositionRecord,
-  type ParamRecord,
-  type DefaultParamRecord,
 } from "./index.ts";
 import type { EnrichOptions } from "../enrich/postprocess.ts";
 import { enrichParsedLog } from "../enrich/postprocess.ts";
@@ -131,11 +128,9 @@ export class DataflashDataExtractor {
   /**
    * Convenience: get both current and default params together.
    */
-  extractParamsSummary(): ParamsSummary {
-    return {
-      params: this.extractParams(),
-      defaults: this.extractDefaultParams(),
-    };
+  extractParamsSummary(): ParamSummaryRecord[] {
+    const result = new ParamSummaryExtractor().extract(this.ctx());
+    return result?.data ?? [];
   }
 
   private ctx(): ExtractionContext {
@@ -149,3 +144,4 @@ function toArray<T>(field?: ParsedMessage[keyof ParsedMessage]): T[] | null {
   if (field instanceof Float64Array) return Array.from(field) as T[];
   return null;
 }
+

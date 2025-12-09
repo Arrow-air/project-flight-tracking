@@ -10,10 +10,8 @@ import type {
 } from "./dataflash/types.ts";
 import {
   DataflashDataExtractor,
-  type ParamRecord,
-  type DefaultParamRecord,
 } from "./dataflash/extract/index.ts";
-
+import type { ParamSummaryRecord } from "./dataflash/extract/params.ts";
 import { getFlightLegLogs, type FlightLogFile } from "storage";
 
 
@@ -32,7 +30,7 @@ Deno.serve(async (req) => {
 
     const logs = await getFlightLegLogs(flightLegId);
     const analyses = logs.map(analyzeLogParams);
-    const payload = buildParamsResponse(flightLegId, analyses);
+    const payload = { flightLegId, analyses };
 
     return new Response(JSON.stringify(payload), {
       status: 200,
@@ -94,8 +92,8 @@ interface LogParamAnalysis {
   path: string;
   name: string;
   sizeBytes: number;
-  params: ParamRecord[];
-  defaultParams: DefaultParamRecord[];
+  sizeMB: number;
+  summary: ParamSummaryRecord[];
   error?: string;
 }
 
@@ -104,13 +102,13 @@ function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
     const extractor = DataflashDataExtractor.fromBuffer(log.bytes, {
       selectedMessages: PARAM_MESSAGES,
     });
-    const { params, defaults } = extractor.extractParamsSummary();
+    const summary = extractor.extractParamsSummary();
     return {
       path: log.path,
       name: log.name,
       sizeBytes: log.bytes.length,
-      params,
-      defaultParams: defaults,
+      sizeMB: Math.round(log.bytes.length / 1024 / 1024),
+      summary,
     };
   } catch (error) {
     console.error(`Failed to extract params for ${log.name}`, error);
@@ -118,89 +116,13 @@ function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
       path: log.path,
       name: log.name,
       sizeBytes: log.bytes.length,
-      params: [],
-      defaultParams: [],
+      sizeMB: Math.round(log.bytes.length / 1024 / 1024),
+      summary: [],
       error: (error as Error).message ?? "Unknown parser error",
     };
   }
 }
 
-interface ParamKeySummary {
-  value?: number;
-  default_value?: number;
-  value_source_log?: string;
-  default_source_log?: string;
-}
-
-function buildParamsResponse(flightLegId: string, logs: LogParamAnalysis[]) {
-  return {
-    flight_leg_id: flightLegId,
-    log_count: logs.length,
-    params: {
-      by_key: buildParamsByKey(logs),
-    },
-    logs: logs.map(serializeLogAnalysis),
-  };
-}
-
-function buildParamsByKey(logs: LogParamAnalysis[]): Record<string, ParamKeySummary> {
-  const summary = new Map<string, ParamKeySummary>();
-
-  for (const log of logs) {
-    for (const record of log.params) {
-      const current = summary.get(record.name) ?? {};
-      // Latest value wins; since params rarely change this mostly grabs first.
-      summary.set(record.name, {
-        ...current,
-        value: record.value,
-        value_source_log: log.name,
-      });
-    }
-
-    for (const record of log.defaultParams) {
-      const current = summary.get(record.name) ?? {};
-      if (current.default_value === undefined) {
-        summary.set(record.name, {
-          ...current,
-          default_value: record.defaultValue,
-          default_source_log: log.name,
-        });
-      }
-    }
-  }
-
-  return Object.fromEntries(
-    Array.from(summary.entries()).sort(([a], [b]) => a.localeCompare(b)),
-  );
-}
-
-function serializeLogAnalysis(log: LogParamAnalysis) {
-  return {
-    path: log.path,
-    name: log.name,
-    size_bytes: log.sizeBytes,
-    params: log.params.map(serializeParamRecord),
-    default_params: log.defaultParams.map(serializeDefaultParamRecord),
-    param_count: log.params.length,
-    default_param_count: log.defaultParams.length,
-    error: log.error,
-  };
-}
-
-function serializeParamRecord(record: ParamRecord) {
-  return {
-    name: record.name,
-    value: record.value,
-    time_us: record.timeUs,
-  };
-}
-
-function serializeDefaultParamRecord(record: DefaultParamRecord) {
-  return {
-    name: record.name,
-    default_value: record.defaultValue,
-  };
-}
 
 function _printSummary(parsed: ParsedLog, selected: string[]): void {
 
@@ -299,12 +221,12 @@ function getSampleRecord(message: ParsedMessage): Record<MessageFieldName, unkno
 }
 
 function _printParams(extractor: DataflashDataExtractor): void {
-  const { params, defaults } = extractor.extractParamsSummary();
+  const summary = extractor.extractParamsSummary();
   console.log("\nPARAM values:");
-  if (params.length === 0) {
+  if (summary.length === 0) {
     console.log("- none found");
   } else {
-    for (const p of params) {
+    for (const p of summary) {
       console.log(
         `- ${p.name} = ${p.value}${p.timeUs !== undefined ? ` @${p.timeUs}` : ""}`,
       );
@@ -312,11 +234,11 @@ function _printParams(extractor: DataflashDataExtractor): void {
   }
 
   console.log("\nDefault PARAM values:");
-  if (defaults.length === 0) {
+  if (summary.length === 0) {
     console.log("- none found");
   } else {
-    for (const d of defaults) {
-      console.log(`- ${d.name} = ${d.defaultValue}`);
+    for (const d of summary) {
+      console.log(`- ${d.name} = ${d.default_value}`);
     }
   }
 }
