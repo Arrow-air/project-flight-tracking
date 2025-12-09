@@ -2,7 +2,7 @@
 
 export { DataflashParserTS } from "./parser.ts";
 
-export { parseField } from "../binary.ts";
+export { parseField } from "./binary.ts";
 export { buildFormatDefinition, parseFmtRecord } from "./fmt.ts";
 export {
   DF_HEADER1,

@@ -45,7 +45,7 @@ The header is the first three bytes:
 
 The **Type** tells us what kind of message we are going to find in the following payload. 
 
-To start, we only need to know that the type ID for `FMT` messages is **128**.
+To start, we only need to know that the type ID for `FMT` messages is **128** (decimal).
 
 *Notes:*
 
@@ -85,10 +85,37 @@ To bring it together we will use an example.
 
 First, we recieve a `FMT` message, describing a coming message.
 
+```
+HEADER1  HEADER2  TYPE
+A3       95       80 (decimal 128)
+
+PAYLOAD
+
+```
+
+That payload might decode to:
+
+```
+Type:   130      // message type id
+Length: 28       // payload bytes for this message type
+Name:   GPS
+Format: Qffcff   // field data types
+Columns:TimeUS,Lat,Lng,Alt,NSats,HDop
+```
+
+> TODO: finish translation example.
+
+Our parser:
+- Scans the log once, collecting offsets by type id and building the format table from all `FMT` records.
+- For each type, it looks up the format definition (length, format string, column names).
+- It steps through every recorded offset, reading fields in order with the per-character decoder (`parseField`), populating column arrays on `ParsedMessage`.
+
+With the `GPS` definition above, when the scanner hits a header like `A3 95 82` (0x82 is decimal 130), it advances 3 bytes past the header, decodes `TimeUS` as `Q`, `Lat` as `f`, etc., and stores the arrays under `parsed.messages["GPS"]`.
+
+
 
 
 
 ### Message Type Vocabulary
-
 
 

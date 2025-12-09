@@ -130,6 +130,10 @@ export interface ParsedMessage {
 
 /**
  * The parsed dataflash log data.
+ * 
+ * @property formatTable - The format table, mapping message type ids to format definitions.
+ * @property messageTypes - The message types, mapping message type names to message type info.
+ * @property messages - The messages, mapping message type names to parsed messages.
  */
 export interface ParsedLog {
   formatTable: Record<MessageTypeId, FormatDefinition>; // { MessageTypeId: FormatDefinition }.

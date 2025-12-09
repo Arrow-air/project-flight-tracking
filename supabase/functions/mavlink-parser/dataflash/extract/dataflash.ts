@@ -55,9 +55,18 @@ export class DataflashDataExtractor {
   ): DataflashDataExtractor {
     const buffer = buf instanceof Uint8Array ? buf.buffer : buf;
     const parser = new DataflashParserTS(buffer);
-    const parsed = parser.parse(options.selectedMessages);
-    const finalParsed = options.enrich ? enrichParsedLog(parsed, options.enrich) : parsed;
+    const parsed: ParsedLog = parser.parse(options.selectedMessages);
+    const finalParsed: ParsedLog = options.enrich ? enrichParsedLog(parsed, options.enrich) : parsed;
+
     return new DataflashDataExtractor(finalParsed);
+  }
+
+  /**
+   * Get the parsed log from the extractor.
+   * @returns The parsed log.
+   */
+  getParsed(): ParsedLog {
+    return this.parsed;
   }
 
   /**
@@ -134,7 +143,9 @@ export class DataflashDataExtractor {
   }
 
   private ctx(): ExtractionContext {
-    return { parsed: this.parsed };
+    return { 
+      parsed: this.parsed 
+    };
   }
 }
 

@@ -11,17 +11,19 @@ export type FlightLogFile = {
     bytes: Uint8Array;     // raw file contents, ready for parsing
 };
 
-export async function getFlightLegLogs(flightLegId: string): Promise<FlightLogFile[]> {
+export async function getFlightLegLogs(flightLegId: string, limit: number = 5): Promise<FlightLogFile[]> {
     const { data: files, error: listError } = await supabaseAdmin
         .storage
         .from(FLIGHT_LOG_BUCKET_NAME)
         .list(flightLegId, {
-            limit: 2,
+            limit: limit,
             sortBy: { column: 'created_at', order: 'desc' },
             // filters: [{ column: 'name', op: 'eq', value: '*.bin' }],
         });
     if (listError) throw listError;
     if (!files || files.length === 0) return [];
+
+    console.debug("Files", files);
 
     const results: FlightLogFile[] = [];
 
