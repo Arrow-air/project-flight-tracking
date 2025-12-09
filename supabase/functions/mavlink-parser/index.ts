@@ -1,8 +1,8 @@
-import { DataflashParserTS } from "./dataflash/parser.ts";
+import { DataflashParserTS } from "./dataflash/core/parser.ts";
 import type {
   MessageTypeId, MessageTypeName, MessageTypeInfo,
   MessageFieldName, FormatDefinition, ParsedLog, ParsedMessage,
-} from "./dataflash/types.ts";
+} from "./dataflash/core/types.ts";
 
 import { DataflashDataExtractor } from "./dataflash/extract/index.ts";
 import type { ParamSummaryRecord } from "./dataflash/extract/params.ts";
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     });
   } catch (err) {
     console.error(err);
-    
+
     return new Response(
       JSON.stringify({ error: (err as Error).message ?? "Unknown error" }),
       {

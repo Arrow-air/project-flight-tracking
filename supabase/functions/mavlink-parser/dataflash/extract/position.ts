@@ -1,4 +1,4 @@
-import type { ParsedLog, ParsedMessage } from "../types.ts";
+import type { ParsedLog, ParsedMessage } from "../core/types.ts";
 import type { ExtractionContext, ExtractionResult, Extractor } from "./types.ts";
 
 export interface PositionRecord {

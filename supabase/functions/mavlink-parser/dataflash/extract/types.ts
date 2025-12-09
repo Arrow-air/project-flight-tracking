@@ -1,4 +1,4 @@
-import type { ParsedLog } from "../types.ts";
+import type { ParsedLog } from "../core/types.ts";
 
 
 export interface ExtractionContext {

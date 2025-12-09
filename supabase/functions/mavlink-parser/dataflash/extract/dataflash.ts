@@ -1,5 +1,5 @@
-import { DataflashParserTS } from "../parser.ts";
-import type { ParsedLog, ParsedMessage } from "../types.ts";
+import { DataflashParserTS } from "../core/parser.ts";
+import type { ParsedLog, ParsedMessage } from "../core/types.ts";
 import { ParamExtractor, DefaultParamExtractor, ParamSummaryExtractor } from "./params.ts";
 import type { ParamRecord, DefaultParamRecord, ParamSummaryRecord } from "./params.ts";
 import {

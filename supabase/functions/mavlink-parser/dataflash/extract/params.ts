@@ -1,4 +1,4 @@
-import type { ParsedMessage } from "../types.ts";
+import type { ParsedMessage } from "../core/types.ts";
 import type { ExtractionContext, ExtractionResult, Extractor } from "./types.ts";
 
 export interface ParamRecord {
