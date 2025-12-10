@@ -14,7 +14,7 @@
         <ItemBadge label="Flight leg" :value="flightLegId" copyable size="lg" />
       </div>
 
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col gap-2">
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" v-model="logDiffOnly" class="checkbox checkbox-sm" />
           <span class="label-text">Only show params that differ across logs</span>
@@ -26,6 +26,18 @@
         <label class="label cursor-pointer gap-2">
           <input type="checkbox" v-model="includeAutoUpdated" class="checkbox checkbox-sm" />
           <span class="label-text">Include auto-updated values</span>
+        </label>
+
+        <label class="input input-sm input-bordered flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21 21-4.35-4.35m0 0A7.5 7.5 0 1 0 5.5 5.5a7.5 7.5 0 0 0 11.15 11.15Z" />
+          </svg>
+          <input
+            v-model="searchTerm"
+            type="text"
+            placeholder="Search parameters"
+            class="grow"
+          />
         </label>
       </div>
 
@@ -43,7 +55,7 @@
         </div>
 
         <div v-else class="max-h-200 overflow-x-auto rounded-box border border-base-200 bg-base-100 shadow-sm">
-          <table class="table table-zebra table-xs table-pin-rows md:table-sm">
+          <table class="table table-zebra table-xs table-pin-rows table-pin-cols md:table-sm">
             <thead>
               <tr>
                 <th class="min-w-[160px]">Parameter</th>
@@ -61,7 +73,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in rows" :key="row.name" :class="row.allEqual ? '' : 'bg-warning/5'">
+              <tr v-for="row in filteredRows" :key="row.name" :class="row.allEqual ? 'hover:bg-base-300' : 'bg-warning/5'">
                 <td class="font-mono text-xs md:text-sm align-top">
                   {{ row.name }}
                 </td>
@@ -114,6 +126,7 @@ const rows = ref<ParamDiffRow[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 
+const searchTerm = ref('');
 const includeUnchangedValues = ref(false);
 const logDiffOnly = ref(true);
 const includeAutoUpdated = ref(false);
@@ -123,6 +136,12 @@ const logDiffOptions = computed(() => {
     logDiffOnly: logDiffOnly.value,
     includeAutoUpdated: includeAutoUpdated.value,
   };
+});
+
+const filteredRows = computed(() => {
+  const term = searchTerm.value.trim().toLowerCase();
+  if (!term) return rows.value;
+  return rows.value.filter((row) => row.name.toLowerCase().includes(term));
 });
 
 const hasFlightLeg = computed(() => Boolean(props.flightLegId));
