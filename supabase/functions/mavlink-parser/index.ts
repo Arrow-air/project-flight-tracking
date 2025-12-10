@@ -1,4 +1,5 @@
 import { Hono, type Context } from "hono";
+import { listFlightLegLogs, type FlightLogHandle } from "storage";
 
 import { getLogParamsDiff } from "./df-analysis/params.ts";
 import { getLogTimeAnalysis } from "./df-analysis/flight-time.ts";
@@ -7,9 +8,6 @@ import { getLogTimeAnalysis } from "./df-analysis/flight-time.ts";
 // import { PARAM_MESSAGES } from "./df-analysis/index.ts";
 // import type { ParamDiffResult } from "./df-analysis/params.ts";
 // import { printParsedLogSummary } from "./df-analysis/misc.ts";
-
-import { listFlightLegLogs } from "storage";
-import type { FlightLogHandle } from "storage";
 
 
 const functionName = 'mavlink-parser'; // MUST match the folder name under `supabase/functions`
@@ -40,6 +38,7 @@ function handleHealthCheck(c: Context): Response {
     routes: [
       'GET    /health',
       'POST   /logs/:flightLegId/params/diff',
+      'POST   /logs/:flightLegId/time/analysis',
     ],
   });
 }

@@ -88,8 +88,6 @@ export function analyzeParamsBuffer(
   };
 }
 
-
-
 const autoUpdatedNames = new Set([
   'MOT_THST_HOVER',
   'STAT_BOOTCNT',
@@ -135,11 +133,7 @@ export async function getLogParamsDiff(
 
   const logsMeta = snapshots.map((s) => s.meta);
   const allNames = new Set<string>();
-
   snapshots.forEach((s) => s.summary.forEach((p) => allNames.add(p.name)));
-  // console.log("allNames", allNames);
-  // console.log("snapshots", snapshots);
-
 
   let rows: ParamDiffRow[] = Array.from(allNames)
     .sort((a, b) => a.localeCompare(b))

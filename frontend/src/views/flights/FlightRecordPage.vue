@@ -23,10 +23,12 @@
         </div>
 
 
+		<!-- Log params diff -->
+		<LogParamsDiffTable v-if="leg" class="mt-6" :flight-leg-id="leg!.id" />
+		
         <!-- Flight notes: list and create -->
         <FlightNotesSection v-if="leg" class="mt-6" :flight-leg-id="leg.id" />
 
-        
 
 		<!-- Delete confirmation modal -->
 		<!-- Deletion handled inside details section -->
@@ -46,6 +48,7 @@ import FlightLegDetailsSection from '@/components/flight_legs/FlightLegDetailsSe
 import FlightNotesSection from '@/components/flight_notes/FlightNotesSection.vue'
 import FlightLogUpload from '@/components/flight_logs/FlightLogUpload.vue'
 import FlightLogsList from '@/components/flight_logs/FlightLogsList.vue'
+import LogParamsDiffTable from '@/features/logAnalysis/components/LogParamsDiffTable.vue'
 
 const route = useRoute()
 const router = useRouter()
