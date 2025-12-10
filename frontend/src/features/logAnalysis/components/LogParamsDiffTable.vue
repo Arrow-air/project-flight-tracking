@@ -1,17 +1,17 @@
 <template>
   <section class="card bg-base-100 shadow">
 
-    <div class="card-body space-y-4">
-      <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+    <div class="card-body">
+      
+      <div class="flex flex-col gap-1 ">
         <div>
           <h1 class="text-lg font-semibold">Log Params Diff</h1>
           <p class="text-sm text-base-content/70">
             Comparing logged parameter values; defaults shown in the last column.
           </p>
         </div>
-        <div class="badge badge-outline badge-sm font-mono">
-          Flight leg: {{ flightLegId }}
-        </div>
+
+        <ItemBadge label="Flight leg" :value="flightLegId" copyable size="lg" />
       </div>
 
       <div v-if="error" class="alert alert-error shadow-sm">
@@ -32,11 +32,13 @@
             <thead>
               <tr>
                 <th class="min-w-[160px]">Parameter</th>
-                <th v-for="log in logs" :key="log.path" class="min-w-[140px]">
-                  <div class="flex flex-col">
-                    <span class="font-semibold">{{ log.name || 'log' }}</span>
-                    <span class="text-[11px] text-base-content/60 font-mono truncate" :title="log.path">
-                      {{ log.path }}
+                <th v-for="log in logs" :key="log.path" class="min-w-[140px] max-w-[160px]">
+                  <div class="flex flex-col gap-0.5">
+                    <span
+                      class="font-semibold truncate"
+                      :title="log.name || log.path"
+                    >
+                      {{ shortLogName(log.name || 'log') }}
                     </span>
                   </div>
                 </th>
@@ -86,6 +88,8 @@ import {
   type ParamDiffRow,
 } from '../logAnalysis.api';
 
+import ItemBadge from '@/components/general/ItemBadge.vue';
+
 const props = defineProps<{
   flightLegId: string;
 }>();
@@ -124,6 +128,17 @@ function defaultForRow(row: ParamDiffRow): number | undefined {
 function formatNumber(value?: number): string {
   if (value === undefined || value === null) return '—';
   return Number(value).toLocaleString(undefined, { maximumFractionDigits: 4 });
+}
+
+function shortLogName(name: string, max: number = 15) {
+  if (!name) return 'log';
+  if (name.length <= max) return name;
+
+  const suffix = name.slice(-8); // always keep last 4 chars
+  const available = Math.max(1, max - suffix.length - 3); // space for prefix
+  const prefix = name.slice(0, available);
+
+  return `${prefix}...${suffix}`;
 }
 
 function cellClasses(row: ParamDiffRow, cell: ParamDiffCell) {
