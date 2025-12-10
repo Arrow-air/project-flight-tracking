@@ -1,12 +1,17 @@
 {
   "version": "5",
   "specifiers": {
+    "jsr:@hono/hono@*": "4.10.8",
     "jsr:@std/assert@1": "1.0.15",
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "npm:@supabase/supabase-js@^2.58.0": "2.87.0",
+    "npm:@types/node@*": "24.2.0",
     "npm:node-mavlink@^2.3.0": "2.3.0"
   },
   "jsr": {
+    "@hono/hono@4.10.8": {
+      "integrity": "afdbfc8d3028faa79d0d23096265cb41863f7f49cbf8542959bbdffc4c71365a"
+    },
     "@std/assert@1.0.15": {
       "integrity": "d64018e951dbdfab9777335ecdb000c0b4e3df036984083be219ce5941e4703b",
       "dependencies": [
@@ -215,6 +220,7 @@
   },
   "workspace": {
     "dependencies": [
+      "jsr:@hono/hono@*",
       "jsr:@std/assert@1",
       "npm:node-mavlink@^2.3.0"
     ]

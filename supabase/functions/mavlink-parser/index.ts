@@ -1,71 +1,138 @@
-import type { ParamSummaryRecord } from "./dataflash/extract/params.ts";
-import { PARAM_MESSAGES } from "./df-analysis/index.ts";
+import { Hono, type Context } from "hono";
+// import type { ParamSummaryRecord } from "./dataflash/extract/params.ts";
+// import { PARAM_MESSAGES } from "./df-analysis/index.ts";
 import { analyzeParamsBuffer, getLogParamsDiff } from "./df-analysis/params.ts";
+import type { ParamDiffResult } from "./df-analysis/params.ts";
 // import { printParsedLogSummary } from "./df-analysis/misc.ts";
 
 import { listFlightLegLogs } from "storage";
 import type { FlightLogHandle } from "storage";
 
-Deno.serve(async (req) => {
-  const url = new URL(req.url);
-  const flightLegId = url.searchParams.get('flightLegId');
 
+const functionName = 'mavlink-parser'; // MUST match the folder name under `supabase/functions`
+const app = new Hono().basePath(`/${functionName}`);
+
+// Health check endpoint
+app.get('/', (c) => {
+  return c.json({
+    ok: true,
+    function: functionName,
+    routes: [
+      'GET    /',
+      'POST   /logs/:flightLegId/params/diff',
+    ],
+  });
+});
+
+app.post('/logs/:flightLegId/params/diff', async (c) => { 
+  return await handleLogParamsDiff(c); 
+});
+
+app.notFound((c) => c.json({ error: 'Function Not Found' }, 404));
+
+app.onError((err, c) => {
+  console.error('Hono error handler:', err);
+  return c.json({ error: err.message ?? 'Internal Server Error' }, 500);
+});
+
+Deno.serve(app.fetch);
+
+
+async function handleLogParamsDiff(c: Context): Promise<Response> {
+  const flightLegId = c.req.param('flightLegId');
   if (!flightLegId || typeof flightLegId !== "string") {
-    return new Response('Flight leg ID is required', { status: 400 });
+    return c.json({ error: 'Flight leg ID is required' }, 400);
   }
 
+  // You can still also read query params if you want options:
+  // e.g. /logs/123/params/diff?includeAutoUpdated=false
+  const includeUnchangedValues = c.req.query('includeUnchangedValues') === 'true'; // default false
+  const logDiffOnly = c.req.query('logDiffOnly') !== 'false'; // default true
+  const includeAutoUpdated = c.req.query('includeAutoUpdated') !== 'false'; // default true
+  
   try {
-    if (req.method !== "POST") {
-      return new Response("Method not allowed", { status: 405 });
-    }
-
     // 1) Fetch flight leg log handles from storage
     console.log("Fetching flight leg logs from storage");
     const logs: FlightLogHandle[] = await listFlightLegLogs(flightLegId);
     console.log("Logs fetched from storage", logs.length);
 
-    // Perform analysis on each log
-    // const analyses = logs.map(analyzeLogParams);
-    // const payload = { flightLegId, analyses };
-
+    // 2) Analyze the log parameters
     const diff = await getLogParamsDiff(logs, {}, {
-      nonDefaultOnly: true,
-      logDiffOnly: false,
-      includeAutoUpdated: false,
+      includeUnchangedValues: includeUnchangedValues,
+      logDiffOnly: logDiffOnly,
+      includeAutoUpdated: includeAutoUpdated,
     });
-    const payload = { flightLegId, diff };
 
-    return new Response(JSON.stringify(payload), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return c.json({ flightLegId, diff });
   } catch (err) {
     console.error(err);
-
-    return new Response(
-      JSON.stringify({ error: (err as Error).message ?? "Unknown error" }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    const message = (err as Error).message ?? 'Unknown error';
+    return c.json({ error: message }, 500);
   }
-});
-
-
-interface LogParamAnalysis {
-  path: string;
-  name: string;
-  sizeBytes: number;
-  sizeMB: number;
-  summary: ParamSummaryRecord[];
-  nonDefaultParams: ParamSummaryRecord[];
-  unchangedParams: ParamSummaryRecord[];
-  totalParamsCount: number;
-  nonDefaultParamsCount: number;
-  unchangedParamsCount: number;
-  error?: string;
 }
+
+
+
+// Deno.serve(async (req) => {
+//   const url = new URL(req.url);
+//   const flightLegId = url.searchParams.get('flightLegId');
+
+//   if (!flightLegId || typeof flightLegId !== "string") {
+//     return new Response('Flight leg ID is required', { status: 400 });
+//   }
+
+//   try {
+//     if (req.method !== "POST") {
+//       return new Response("Method not allowed", { status: 405 });
+//     }
+
+//     // 1) Fetch flight leg log handles from storage
+//     console.log("Fetching flight leg logs from storage");
+//     const logs: FlightLogHandle[] = await listFlightLegLogs(flightLegId);
+//     console.log("Logs fetched from storage", logs.length);
+
+//     // Perform analysis on each log
+//     // const analyses = logs.map(analyzeLogParams);
+//     // const payload = { flightLegId, analyses };
+
+//     const diff = await getLogParamsDiff(logs, {}, {
+//       includeUnchangedValues: false,
+//       logDiffOnly: true,
+//       includeAutoUpdated: true,
+//     });
+//     const payload = { flightLegId, diff };
+
+//     return new Response(JSON.stringify(payload), {
+//       status: 200,
+//       headers: { "Content-Type": "application/json" },
+//     });
+//   } catch (err) {
+//     console.error(err);
+
+//     return new Response(
+//       JSON.stringify({ error: (err as Error).message ?? "Unknown error" }),
+//       {
+//         status: 500,
+//         headers: { "Content-Type": "application/json" },
+//       }
+//     );
+//   }
+// });
+
+
+// interface LogParamAnalysis {
+//   path: string;
+//   name: string;
+//   sizeBytes: number;
+//   sizeMB: number;
+//   summary: ParamSummaryRecord[];
+//   nonDefaultParams: ParamSummaryRecord[];
+//   unchangedParams: ParamSummaryRecord[];
+//   totalParamsCount: number;
+//   nonDefaultParamsCount: number;
+//   unchangedParamsCount: number;
+//   error?: string;
+// }
 
 // function analyzeLogParams(log: FlightLogFile): LogParamAnalysis {
 //   try {

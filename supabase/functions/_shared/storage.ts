@@ -10,6 +10,10 @@ export type FlightLogFile = {
     bytes: Uint8Array;     // raw file contents, ready for parsing
 };
 
+/**
+ * A handle to a flight leg log file in the storage bucket.
+ * Use the `download` method to fetch the file on demand.
+ */
 export interface FlightLogHandle {
     path: string;                  // "flight_leg_id/log1.bin"
     name: string;                  // "log1.bin"
@@ -23,6 +27,10 @@ export interface FlightLogHandle {
     download: () => Promise<FlightLogFile>; // lazily fetches the file
 }
 
+/**
+ * A file object from the storage bucket.
+ * Soft extends the `StorageFile` interface with additional properties.
+ */
 type StorageFile = {
     name: string;
     created_at?: string | null;

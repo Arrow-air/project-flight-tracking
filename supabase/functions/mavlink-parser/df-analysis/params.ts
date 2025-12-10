@@ -8,8 +8,6 @@ import type { FlightLogFile, FlightLogHandle, } from "storage";
 export const PARAM_MESSAGES = ["PARM", "PARAM_VALUE"] as const;
 
 
-
-
 export interface ParamAnalysisResult {
   /**
    * Summary of all parameter values.
@@ -25,22 +23,17 @@ export interface ParamAnalysisResult {
   unchangedParams: ParamSummaryRecord[];
 }
 
-export interface LogMetadata {
-  id: string;            // stable ID in your system
-  name?: string;        // human-friendly: filename or flight name
-  createdAt?: Date;     // time log was recorded
-}
-
 /**
  * Options for analyzing parameter differences between logs.
- * @property {boolean} nonDefaultOnly - Values must differ from the default value.
+ * @property {boolean} includeUnchangedValues - Include fields that are unchanged from the default value.
  * @property {boolean} logDiffOnly - Log param values must differ.
+ * @property {boolean} includeAutoUpdated - Include parameters auto-updated by the autopilot at runtime.
  */
 export interface LogParamDiffOptions {
   /**
-   * Only include parameters that differ from the default value.
+   * Include fields that are unchanged from the default value.
    */
-  nonDefaultOnly?: boolean;
+  includeUnchangedValues?: boolean;
   /**
    * Only include parameters that differ from one another.
    * If true, will show only parameters that differ across 2+ logs.
@@ -67,7 +60,7 @@ export interface ParamDiffRow {
 }
 
 export interface ParamDiffResult {
-  logs: LogMetadata[];        // column headers
+  logs: FlightLogHandle[];    // column headers (flight leg log handles)
   rows: ParamDiffRow[];       // table rows
 }
 
@@ -125,21 +118,22 @@ export async function getLogParamsDiff(
   logHandles: FlightLogHandle[],
   options: DataflashDataExtractorOptions = {},
   logDiffOptions: LogParamDiffOptions = {
-    nonDefaultOnly: true,
+    includeUnchangedValues: false,
     logDiffOnly: true,
     includeAutoUpdated: false,
   },
 ): Promise<ParamDiffResult> {
 
   // Process sequentially to keep memory usage low with very large logs.
-  const snapshots: { meta: LogMetadata; summary: ParamSummaryRecord[] }[] = [];
+  const snapshots: { meta: FlightLogHandle; summary: ParamSummaryRecord[] }[] = [];
 
   for (const log of logHandles) {
     const file: FlightLogFile = await log.download(); // fetch on-demand
     const summary = analyzeParamsBuffer(file.bytes, options).summary;
 
     snapshots.push({
-      meta: { id: log.path, name: log.name } satisfies LogMetadata,
+      // meta: { id: log.path, name: log.name } satisfies LogMetadata,
+      meta: log,
       summary,
     });
     // allow GC to reclaim the large buffer once we move to the next log
@@ -160,7 +154,7 @@ export async function getLogParamsDiff(
         const param = s.summary.find((p) => p.name === name);
         const differsFromDefault =
           param?.default_value !== undefined && param.value !== param.default_value;
-        return { logId: s.meta.id, param, differsFromDefault };
+        return { logId: s.meta.path, param, differsFromDefault };
       });
 
       const values = cells.map((c) => c.param?.value);
@@ -171,8 +165,8 @@ export async function getLogParamsDiff(
       return { name, cells, allEqual, presentInAllLogs };
     });
 
-  if (logDiffOptions.nonDefaultOnly) {
-    // Remove rows where all values are same as default
+  if (!logDiffOptions.includeUnchangedValues) {
+    // Remove rows where all values are the same as the default value.  
     rows = rows.filter((r) => r.cells.every((c) => c.differsFromDefault ?? false));
   }
   if (logDiffOptions.logDiffOnly) {
@@ -188,9 +182,7 @@ export async function getLogParamsDiff(
   // With nonDefaultOnly: 274
   // With logDiffOnly: 14
   // With nonDefaultOnly and !includeAutoUpdated: 260
-  console.log("Rows: ", rows.map((r) => r.name));
+  // console.log("Rows: ", rows.map((r) => r.name));
 
   return { logs: logsMeta, rows };
 }
-
-// function getLogParamsDiff(log: FlightLogFile): ParamDiffResult {
