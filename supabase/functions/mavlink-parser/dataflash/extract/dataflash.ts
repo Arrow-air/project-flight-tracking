@@ -1,13 +1,13 @@
 import { DataflashParserTS } from "../core/parser.ts";
 import type { ParsedLog, ParsedMessage } from "../core/types.ts";
+
 import { ParamExtractor, DefaultParamExtractor, ParamSummaryExtractor } from "./params.ts";
 import type { ParamRecord, DefaultParamRecord, ParamSummaryRecord } from "./params.ts";
+import { TimeExtractor, type TimeExtraction } from "./time.ts";
+import { ModeExtractor, type ModeRecord, type ModeExtractorOptions } from "./mode.ts";
 import {
-  ModeExtractor,
   PositionExtractor,
-  type ModeExtractorOptions,
   type PositionExtractorOptions,
-  type ModeRecord,
   type PositionRecord,
 } from "./index.ts";
 import type { EnrichOptions } from "../enrich/postprocess.ts";
@@ -140,6 +140,14 @@ export class DataflashDataExtractor {
   extractParamsSummary(): ParamSummaryRecord[] {
     const result = new ParamSummaryExtractor().extract(this.ctx());
     return result?.data ?? [];
+  }
+
+  /**
+   * Extract flight/boot timing information derived from EV/ARM/PARM messages.
+   */
+  extractTime(): TimeExtraction | null {
+    const result = new TimeExtractor().extract(this.ctx());
+    return result?.data ?? null;
   }
 
   private ctx(): ExtractionContext {

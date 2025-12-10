@@ -126,16 +126,10 @@ export async function getLogParamsDiff(
 
   // Process sequentially to keep memory usage low with very large logs.
   const snapshots: { meta: FlightLogHandle; summary: ParamSummaryRecord[] }[] = [];
-
   for (const log of logHandles) {
     const file: FlightLogFile = await log.download(); // fetch on-demand
     const summary = analyzeParamsBuffer(file.bytes, options).summary;
-
-    snapshots.push({
-      // meta: { id: log.path, name: log.name } satisfies LogMetadata,
-      meta: log,
-      summary,
-    });
+    snapshots.push({ meta: log, summary });
     // allow GC to reclaim the large buffer once we move to the next log
   }
 
@@ -182,7 +176,7 @@ export async function getLogParamsDiff(
   // With nonDefaultOnly: 274
   // With logDiffOnly: 14
   // With nonDefaultOnly and !includeAutoUpdated: 260
-  // console.log("Rows: ", rows.map((r) => r.name));
+  console.log("Rows: ", rows.map((r) => r.name));
 
   return { logs: logsMeta, rows };
 }
