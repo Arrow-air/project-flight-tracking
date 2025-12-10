@@ -2,34 +2,52 @@ import { useAuthStore } from '@/features/auth/auth.store';
 import { supabase } from '@/lib/supabaseClient';
 import { withErrorHandling, requireAuth } from '@/api/errorHandler';
 
-import type { ParamDiffResult as LogParamDiffResult,
-    LogParamDiffOptions,
-} from '@/../../../supabase/functions/mavlink-parser/df-analysis/params';
-export type {
-    ParamDiffCell, ParamDiffRow,
-} from '@/../../../supabase/functions/mavlink-parser/df-analysis/params';
+// import type { 
+//     // ParamDiffResult as LogParamDiffResult,
+//     LogParamDiffOptions,
+// } from '@/../../../supabase/functions/mavlink-parser/df-analysis/params';
+// export type {
+//     ParamDiffCell, ParamDiffRow,
+// } from '@/../../../supabase/functions/mavlink-parser/df-analysis/params';
 
 const ENTITY_NAME = 'log_analysis';
 
-// export interface ParamSummaryRecord {
-//     name: string;
-//     value?: number;
-//     default_value?: number;
-//     timeUs?: number;
-// }
+export interface LogParamDiffOptions {
+    /**
+     * Include fields that are unchanged from the default value.
+     */
+    includeUnchangedValues?: boolean;
+    /**
+     * Only include parameters that differ from one another.
+     * If true, will show only parameters that differ across 2+ logs.
+     */
+    logDiffOnly?: boolean;
+    /**
+     * Whether to include parameters that have been auto-updated
+     * by the autopilot at runtime.
+     */
+    includeAutoUpdated?: boolean;
+  }
 
-// export interface ParamDiffCell {
-//     logId: string;
-//     param?: ParamSummaryRecord;
-//     differsFromDefault?: boolean;
-// }
+export interface ParamSummaryRecord {
+    name: string;
+    value?: number;
+    default_value?: number;
+    timeUs?: number;
+}
 
-// export interface ParamDiffRow {
-//     name: string;
-//     cells: ParamDiffCell[];
-//     allEqual: boolean;
-//     presentInAllLogs: boolean;
-// }
+export interface ParamDiffCell {
+    logId: string;
+    param?: ParamSummaryRecord;
+    differsFromDefault?: boolean;
+}
+
+export interface ParamDiffRow {
+    name: string;
+    cells: ParamDiffCell[];
+    allEqual: boolean;
+    presentInAllLogs: boolean;
+}
 
 export interface FlightLogMeta {
     path: string;
@@ -43,10 +61,10 @@ export interface FlightLogMeta {
     metadata?: Record<string, unknown>;
 }
 
-// export interface LogParamDiffResult {
-//     logs: FlightLogMeta[];
-//     rows: ParamDiffRow[];
-// }
+export interface LogParamDiffResult {
+    logs: FlightLogMeta[];
+    rows: ParamDiffRow[];
+}
 
 export interface LogParamDiffResponse {
     flightLegId: string;

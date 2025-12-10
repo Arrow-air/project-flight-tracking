@@ -69,6 +69,7 @@ const badgeClasses = computed(() => {
   return [
     'badge inline-flex flex-wrap max-w-full whitespace-normal h-auto min-h-0',
     variant === 'outline' ? 'badge-outline' : `badge-${variant}`,
+    `badge-${size}`,
     props.maxWidthClass ?? 'max-w-[320px]',
     props.copyable && 'cursor-pointer select-none',
   ].filter(Boolean);

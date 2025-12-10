@@ -5,7 +5,7 @@
       
       <div class="flex flex-col gap-1 mb-2 ">
         <div>
-          <h1 class="text-lg font-semibold">Log Params Diff</h1>
+          <h1 class="text-lg font-semibold">Log Params</h1>
           <p class="text-sm text-base-content/70">
             Comparing logged parameter values; defaults shown in the last column.
           </p>

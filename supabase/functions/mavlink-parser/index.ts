@@ -58,9 +58,9 @@ async function handleLogParamsDiff(c: Context): Promise<Response> {
   
   try {
     // 1) Fetch flight leg log handles from storage
-    console.log("Fetching flight leg logs from storage");
+    // console.log("Fetching flight leg logs from storage");
     const logs: FlightLogHandle[] = await listFlightLegLogs(flightLegId);
-    console.log("Logs fetched from storage", logs.length);
+    // console.log("Logs fetched from storage", logs.length);
 
     // 2) Analyze the log parameters
     const diff = await getLogParamsDiff(logs, {}, {
@@ -86,9 +86,9 @@ async function handleLogTimeAnalysis(c: Context): Promise<Response> {
 
   try {
     // 1) Fetch flight leg log handles from storage
-    console.log("Fetching flight leg logs from storage");
+    // console.log("Fetching flight leg logs from storage");
     const logs: FlightLogHandle[] = await listFlightLegLogs(flightLegId);
-    console.log("Logs fetched from storage", logs.length);
+    // console.log("Logs fetched from storage", logs.length);
 
     // 2) Analyze the log time
     const timeAnalyses = await getLogTimeAnalysis(logs, {});

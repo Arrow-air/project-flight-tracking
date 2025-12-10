@@ -165,12 +165,12 @@ export async function getLogParamsDiff(
     rows = rows.filter((r) => isLikelyUserConfig(r.name));
   }
 
-  console.log("Rows returned: ", rows.length);
-  // With default: 1216
-  // With nonDefaultOnly: 274
-  // With logDiffOnly: 14
-  // With nonDefaultOnly and !includeAutoUpdated: 260
-  console.log("Rows: ", rows.map((r) => r.name));
+  // console.log("Rows returned: ", rows.length);
+  // // With default: 1216
+  // // With nonDefaultOnly: 274
+  // // With logDiffOnly: 14
+  // // With nonDefaultOnly and !includeAutoUpdated: 260
+  // console.log("Rows: ", rows.map((r) => r.name));
 
   return { logs: logsMeta, rows };
 }
