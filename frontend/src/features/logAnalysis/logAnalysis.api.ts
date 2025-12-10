@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabaseClient';
 import { withErrorHandling, requireAuth } from '@/api/errorHandler';
 
 import type { ParamDiffResult as LogParamDiffResult,
+    LogParamDiffOptions,
 } from '@/../../../supabase/functions/mavlink-parser/df-analysis/params';
 export type {
     ParamDiffCell, ParamDiffRow,
@@ -54,15 +55,38 @@ export interface LogParamDiffResponse {
 
 export async function getLogParamsDiff(
     flightLegId: string,
+    options?: LogParamDiffOptions,
 ): Promise<LogParamDiffResponse | null> {
 	const operation = 'get log params diff';
 
     const authStore = useAuthStore(); // TODO: shortly to replace with improved version
     requireAuth(authStore, operation);
 
+    let logDiffQuery: string = '';
+    if (options) {
+        let queryParams: string[] = [];
+        if (options?.includeUnchangedValues !== undefined) {
+            queryParams.push(`includeUnchangedValues=${options.includeUnchangedValues}`);
+        }
+        if (options?.logDiffOnly !== undefined) {
+            queryParams.push(`logDiffOnly=${options.logDiffOnly}`);
+        }
+        if (options?.includeAutoUpdated !== undefined) {
+            queryParams.push(`includeAutoUpdated=${options.includeAutoUpdated}`);
+        }
+        logDiffQuery = queryParams.join('&');
+        if (logDiffQuery.length > 0) {
+            logDiffQuery = `?${logDiffQuery}`;
+        }
+    }
+
 	const result = await withErrorHandling(async () => {
+        let functionUrl = `mavlink-parser/logs/${flightLegId}/params/diff`;
+        if (logDiffQuery.length > 0) {
+            functionUrl += logDiffQuery;
+        }
 		const { data, error } = await supabase.functions.invoke<LogParamDiffResponse>(
-            `mavlink-parser/logs/${flightLegId}/params/diff`, 
+            functionUrl, 
             {
                 method: 'POST',
                 body: { flightLegId },

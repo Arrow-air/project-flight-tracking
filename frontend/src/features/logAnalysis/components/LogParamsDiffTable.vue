@@ -3,7 +3,7 @@
 
     <div class="card-body">
       
-      <div class="flex flex-col gap-1 ">
+      <div class="flex flex-col gap-1 mb-2 ">
         <div>
           <h1 class="text-lg font-semibold">Log Params Diff</h1>
           <p class="text-sm text-base-content/70">
@@ -12,6 +12,21 @@
         </div>
 
         <ItemBadge label="Flight leg" :value="flightLegId" copyable size="lg" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" v-model="logDiffOnly" class="checkbox checkbox-sm" />
+          <span class="label-text">Only show params that differ across logs</span>
+        </label>
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" v-model="includeUnchangedValues" class="checkbox checkbox-sm" />
+          <span class="label-text">Include unchanged values</span>
+        </label>
+        <label class="label cursor-pointer gap-2">
+          <input type="checkbox" v-model="includeAutoUpdated" class="checkbox checkbox-sm" />
+          <span class="label-text">Include auto-updated values</span>
+        </label>
       </div>
 
       <div v-if="error" class="alert alert-error shadow-sm">
@@ -27,8 +42,8 @@
           <span>No parameters were returned for this flight leg.</span>
         </div>
 
-        <div v-else class="overflow-x-auto rounded-box border border-base-200 bg-base-100 shadow-sm">
-          <table class="table table-zebra table-xs md:table-sm">
+        <div v-else class="max-h-200 overflow-x-auto rounded-box border border-base-200 bg-base-100 shadow-sm">
+          <table class="table table-zebra table-xs table-pin-rows md:table-sm">
             <thead>
               <tr>
                 <th class="min-w-[160px]">Parameter</th>
@@ -99,6 +114,17 @@ const rows = ref<ParamDiffRow[]>([]);
 const isLoading = ref(false);
 const error = ref<string | null>(null);
 
+const includeUnchangedValues = ref(false);
+const logDiffOnly = ref(true);
+const includeAutoUpdated = ref(false);
+const logDiffOptions = computed(() => {
+  return {
+    includeUnchangedValues: includeUnchangedValues.value,
+    logDiffOnly: logDiffOnly.value,
+    includeAutoUpdated: includeAutoUpdated.value,
+  };
+});
+
 const hasFlightLeg = computed(() => Boolean(props.flightLegId));
 
 async function fetchDiff() {
@@ -108,7 +134,7 @@ async function fetchDiff() {
   error.value = null;
 
   try {
-    const data = await getLogParamsDiff(props.flightLegId);
+    const data = await getLogParamsDiff(props.flightLegId, logDiffOptions.value);
     if (!data?.diff) throw new Error('No parameter diff was returned.');
 
     const diff = data.diff;
@@ -155,5 +181,12 @@ watch(
     fetchDiff();
   },
   { immediate: true },
+);
+
+watch(
+  () => [includeUnchangedValues.value, logDiffOnly.value, includeAutoUpdated.value],
+  () => {
+    fetchDiff();
+  },
 );
 </script>
