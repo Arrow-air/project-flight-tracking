@@ -27,3 +27,8 @@ indent_size = 2
 # we might want to use https://www.npmjs.com/package/lintspaces instead, we can't lint the css and js comments atm
 [{*.js,*.css,Cargo.lock}]
 indent_size = unset
+[{*.vue}]
+trim_trailing_whitespace = true
+[{*.sql}]
+indent_size = off
+trim_trailing_whitespace = true
