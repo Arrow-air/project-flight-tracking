@@ -128,7 +128,7 @@ file_size_limit = "250MiB"
 # Uncomment to configure local storage buckets
 [storage.buckets.flight_logs]
 public = false
-file_size_limit = "50MiB"
+file_size_limit = "100MiB"
 # Allow common ArduPilot log formats and other binary files, plus images
 allowed_mime_types = [
   "image/png",
@@ -144,6 +144,7 @@ allowed_mime_types = [
   "application/x-mavlink-log",  # MAVLink logs
   "application/x-apj",          # .apj parameter files
   "application/x-binary",       # Generic binary
+  "application/macbinary",      # Some Macs convert to this format
 ]
 objects_path = "./seeds/storage/flight_logs"
 
@@ -390,7 +391,8 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.mavlink-parser]
 enabled = true
-verify_jwt = false
+# Only allow requests with a valid JWT token
+verify_jwt = true
 # import_map = "./functions/mavlink-parser/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
