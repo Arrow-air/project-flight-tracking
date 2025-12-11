@@ -5,7 +5,7 @@
 #    -> Base environment variables
 **/.env
 */.env
-**/!.env.example 
+**/!.env.example
 
 #    -> Never commit keys, but encrypted envs are fine
 .env.keys

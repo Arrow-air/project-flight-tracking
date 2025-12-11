@@ -1,19 +1,19 @@
 <template>
-	<div class="card bg-base-100 shadow">
-		<div class="card-body">
-			<h3 class="card-title">Upload flight log</h3>
-			<form class="grid gap-3" @submit.prevent="submit">
-				<input ref="fileInput" type="file" class="file-input file-input-bordered w-full" @change="onFile" />
-				<div class="flex justify-end gap-2">
-					<button type="submit" class="btn btn-primary" :disabled="!file || uploading">
-						<span v-if="uploading" class="loading loading-spinner loading-sm"></span>
-						<span v-else>Upload</span>
-					</button>
-				</div>
-				<p v-if="error" class="text-error text-sm">{{ error }}</p>
-			</form>
-		</div>
-	</div>
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <h3 class="card-title">Upload flight log</h3>
+            <form class="grid gap-3" @submit.prevent="submit">
+                <input ref="fileInput" type="file" class="file-input file-input-bordered w-full" @change="onFile" />
+                <div class="flex justify-end gap-2">
+                    <button type="submit" class="btn btn-primary" :disabled="!file || uploading">
+                        <span v-if="uploading" class="loading loading-spinner loading-sm"></span>
+                        <span v-else>Upload</span>
+                    </button>
+                </div>
+                <p v-if="error" class="text-error text-sm">{{ error }}</p>
+            </form>
+        </div>
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -29,29 +29,27 @@ const uploading = ref(false)
 const error = ref('')
 
 function onFile(e: Event) {
-	const input = e.target as HTMLInputElement;
-	file.value = input.files?.[0] || null;
+    const input = e.target as HTMLInputElement;
+    file.value = input.files?.[0] || null;
 }
 
 async function submit() {
-	if (!file.value) return;
-	try {
-		uploading.value = true;
-		error.value = '';
-		const created = await uploadFlightLog(props.flightLegId, file.value);
-		file.value = null;
-		if (fileInput.value) {
-			fileInput.value.value = '';
-		}
-		emit('uploaded', created);
-	} catch (e: any) {
-		error.value = e?.message || 'Failed to upload flight log';
-	} finally {
-		uploading.value = false;
-	}
+    if (!file.value) return;
+    try {
+        uploading.value = true;
+        error.value = '';
+        const created = await uploadFlightLog(props.flightLegId, file.value);
+        file.value = null;
+        if (fileInput.value) {
+            fileInput.value.value = '';
+        }
+        emit('uploaded', created);
+    } catch (e: any) {
+        error.value = e?.message || 'Failed to upload flight log';
+    } finally {
+        uploading.value = false;
+    }
 }
 </script>
 
 <style scoped></style>
-
-
