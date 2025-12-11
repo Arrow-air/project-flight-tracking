@@ -1,4 +1,6 @@
 import { Hono, type Context } from "hono";
+import { cors } from "hono/cors";
+import { functionCORS } from "../_shared/cors.ts";
 import { listFlightLegLogs, type FlightLogHandle } from "storage";
 
 import { getLogParamsDiff } from "./df-analysis/params.ts";
@@ -12,6 +14,30 @@ import { getLogTimeAnalysis } from "./df-analysis/flight-time.ts";
 
 const functionName = 'mavlink-parser'; // MUST match the folder name under `supabase/functions`
 const app = new Hono().basePath(`/${functionName}`);
+
+// Hono CORS middleware: https://hono.dev/docs/middleware/builtin/cors
+app.use('*', cors({
+  // origin: '*',
+  origin: (requestOrigin: string | null) => {
+    if (!requestOrigin) return ''; // Must have one
+
+    const allowedExact = functionCORS.origin; // From shared config
+    if (allowedExact.includes(requestOrigin)) return requestOrigin;
+
+    const isVercelPreview =
+      requestOrigin.startsWith('https://project-flight-tracking-') &&
+      requestOrigin.endsWith('-arrow-air.vercel.app');
+    if (isVercelPreview) return requestOrigin; 
+
+    return ''; // Not allowed → no ACAO header
+  },
+  allowMethods: functionCORS.allowMethods,
+  allowHeaders: functionCORS.allowHeaders,
+  // exposeHeaders: functionCORS.exposeHeaders,
+  maxAge: functionCORS.maxAge,
+  // credentials: functionCORS.credentials,
+  credentials: false,
+}));
 
 app.get('/health', (c) => { return handleHealthCheck(c); }); // Health check endpoint
 app.post('/logs/:flightLegId/params/diff', async (c) => { return await handleLogParamsDiff(c); });

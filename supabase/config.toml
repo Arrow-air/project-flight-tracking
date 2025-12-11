@@ -154,11 +154,10 @@ enabled = true
 # in emails.
 
 # Match the Vite dev server port
-site_url = "http://127.0.0.1:3000" 
+site_url = "https://project-flight-tracking.vercel.app/" 
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
 additional_redirect_urls = [
   # Permit vercel app URLs
-  "https://project-flight-tracking.vercel.app", # Specific for this project
   "https://project-flight-tracking-*-arrow-air.vercel.app", # Preview deployments
   "https://*-arrow-air.vercel.app", # More general: all arrow-air apps
 
@@ -387,3 +386,16 @@ s3_region = "env(S3_REGION)"
 s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
+
+
+[functions.mavlink-parser]
+enabled = true
+verify_jwt = false
+# import_map = "./functions/mavlink-parser/deno.json"
+# Uncomment to specify a custom file path to the entrypoint.
+# Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
+entrypoint = "./functions/mavlink-parser/index.ts"
+# Specifies static files to be bundled with the function. Supports glob patterns.
+# For example, if you want to serve static HTML pages in your function:
+# static_files = [ "./functions/mavlink-parser/*.html" ]
+
