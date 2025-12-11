@@ -21,18 +21,18 @@ CREATE TABLE public.flight_leg_logs (
 
 ALTER TABLE public.flight_leg_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can view own flight leg logs" ON public.flight_leg_logs 
+CREATE POLICY "Users can view own flight leg logs" ON public.flight_leg_logs
 FOR SELECT TO authenticated USING ((SELECT auth.uid()) = uploaded_by_id);
 
-CREATE POLICY "Users can create flight leg logs" ON public.flight_leg_logs 
-FOR INSERT TO authenticated 
+CREATE POLICY "Users can create flight leg logs" ON public.flight_leg_logs
+FOR INSERT TO authenticated
 WITH CHECK ((SELECT auth.uid()) = uploaded_by_id);
 
-CREATE POLICY "Users can update own flight leg logs" ON public.flight_leg_logs 
+CREATE POLICY "Users can update own flight leg logs" ON public.flight_leg_logs
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = uploaded_by_id)
 WITH CHECK ((SELECT auth.uid()) = uploaded_by_id);
 
-CREATE POLICY "Users can delete own flight leg logs" ON public.flight_leg_logs 
+CREATE POLICY "Users can delete own flight leg logs" ON public.flight_leg_logs
 FOR DELETE TO authenticated USING ((SELECT auth.uid()) = uploaded_by_id);
 
 CREATE TRIGGER set_updated_at_flight_leg_logs

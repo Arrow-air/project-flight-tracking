@@ -25,14 +25,14 @@ CREATE TABLE public.flight_notes (
 ALTER TABLE public.flight_notes ENABLE ROW LEVEL SECURITY;
 
 -- Policies for flight_notes
-CREATE POLICY "Users can view own flight notes" ON public.flight_notes 
+CREATE POLICY "Users can view own flight notes" ON public.flight_notes
 FOR SELECT TO authenticated USING ((SELECT auth.uid()) = author_id);
 
-CREATE POLICY "Users can create flight notes" ON public.flight_notes 
-FOR INSERT TO authenticated 
+CREATE POLICY "Users can create flight notes" ON public.flight_notes
+FOR INSERT TO authenticated
 WITH CHECK ((SELECT auth.uid()) = author_id);
 
-CREATE POLICY "Users can update own flight notes" ON public.flight_notes 
+CREATE POLICY "Users can update own flight notes" ON public.flight_notes
 FOR UPDATE USING ((SELECT auth.uid()) = author_id)
 WITH CHECK ((SELECT auth.uid()) = author_id);
 

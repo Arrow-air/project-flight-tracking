@@ -22,14 +22,14 @@ CREATE TABLE public.flight_legs (
 ALTER TABLE public.flight_legs ENABLE ROW LEVEL SECURITY;
 
 -- Policies for flight_run
-CREATE POLICY "Users can view own flight runs" ON public.flight_legs 
+CREATE POLICY "Users can view own flight runs" ON public.flight_legs
 FOR SELECT TO authenticated USING ((SELECT auth.uid()) = pilot_id);
 
-CREATE POLICY "Users can create flight runs" ON public.flight_legs 
-FOR INSERT TO authenticated 
+CREATE POLICY "Users can create flight runs" ON public.flight_legs
+FOR INSERT TO authenticated
 WITH CHECK ((SELECT auth.uid()) = pilot_id);
 
-CREATE POLICY "Users can update own flight runs" ON public.flight_legs 
+CREATE POLICY "Users can update own flight runs" ON public.flight_legs
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = pilot_id)
 WITH CHECK ((SELECT auth.uid()) = pilot_id);
 

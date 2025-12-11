@@ -16,19 +16,19 @@ CREATE TABLE public.tags (
 ALTER TABLE public.tags ENABLE ROW LEVEL SECURITY;
 
 -- Policies for tags
-CREATE POLICY "Users can view tags" ON public.tags 
+CREATE POLICY "Users can view tags" ON public.tags
 FOR SELECT TO authenticated, anon USING (true);
 
-CREATE POLICY "Authenticated users can create tags" ON public.tags 
-FOR INSERT TO authenticated 
+CREATE POLICY "Authenticated users can create tags" ON public.tags
+FOR INSERT TO authenticated
 WITH CHECK ((SELECT auth.uid()) = created_by_id);
 
-CREATE POLICY "Users can update own tags" ON public.tags 
+CREATE POLICY "Users can update own tags" ON public.tags
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = created_by_id)
 WITH CHECK ((SELECT auth.uid()) = created_by_id);
 
 -- Add updated_at trigger
 CREATE TRIGGER set_updated_at_tags
-  BEFORE UPDATE ON public.tags 
-  FOR EACH ROW 
+  BEFORE UPDATE ON public.tags
+  FOR EACH ROW
   EXECUTE FUNCTION extensions.moddatetime('updated_at');
