@@ -16,11 +16,13 @@ CREATE TABLE public.aircraft_maintenance_log (
   updated_at timestamp with time zone NOT NULL DEFAULT now(),
 
   -- Relationships
-  author_id uuid REFERENCES public.user_profiles(id),
+  author_id uuid REFERENCES public.user_profiles(id) ON DELETE SET NULL,
   aircraft_id uuid REFERENCES public.aircraft(id) ON DELETE CASCADE,
 
   -- Data
   log_type public.maintenance_log_type NOT NULL,
+  log_date date DEFAULT CURRENT_DATE,
+  title text,
   notes text
 );
 

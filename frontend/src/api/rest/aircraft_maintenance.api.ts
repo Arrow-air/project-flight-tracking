@@ -24,6 +24,8 @@ export interface MaintenanceLogRow {
 	author_id: string | null
 	aircraft_id: string
 	log_type: MaintenanceLogType
+	log_date: string | null
+	title: string | null
 	notes: string | null
 }
 
@@ -35,16 +37,22 @@ export interface MaintenanceLogData {
 	authorId: string | null
 	aircraftId: string
 	logType: MaintenanceLogType
+	logDate?: string | null
+	title?: string | null
 	notes: string | null
 }
 
 export type CreateMaintenanceLogInput = {
 	logType: MaintenanceLogType
+	logDate?: string | null
+	title?: string | null
 	notes?: string | null
 }
 
 export type UpdateMaintenanceLogInput = {
 	logType?: MaintenanceLogType
+	logDate?: string | null
+	title?: string | null
 	notes?: string | null
 }
 
@@ -56,6 +64,8 @@ function mapRowToData(row: MaintenanceLogRow): MaintenanceLogData {
 		authorId: row.author_id,
 		aircraftId: row.aircraft_id,
 		logType: row.log_type,
+		logDate: row.log_date,
+		title: row.title,
 		notes: row.notes,
 	}
 }
@@ -130,6 +140,8 @@ export async function createMaintenanceLog(
 					aircraft_id: aircraftId,
 					author_id: authStore.userId,
 					log_type: input.logType,
+					log_date: input.logDate ?? null,
+					title: input.title ?? null,
 					notes: input.notes ?? null,
 				},
 			])
@@ -156,6 +168,8 @@ export async function updateMaintenanceLog(
 
 	const payload: Partial<MaintenanceLogRow> = {
 		log_type: input.logType ?? (undefined as any),
+		log_date: input.logDate ?? (undefined as any),
+		title: input.title ?? (undefined as any),
 		notes: input.notes ?? (undefined as any),
 	}
 
