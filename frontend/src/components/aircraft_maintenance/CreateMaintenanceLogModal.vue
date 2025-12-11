@@ -61,7 +61,7 @@ const types: MaintenanceLogType[] = ['build', 'maintenance', 'upgrade', 'repair'
 const modalRef = ref<HTMLDialogElement | null>(null);
 const loading = ref(false);
 const error = ref('');
-const form = ref<{ logType: MaintenanceLogType | ''; title: string; logDate: string; notes: string }>({ logType: '', title: '', logDate: '', notes: '' })
+// const form = ref<{ logType: MaintenanceLogType | ''; title: string; logDate: string; notes: string }>({ logType: '', title: '', logDate: '', notes: '' })
 
 const logType = ref<MaintenanceLogType>('build');
 const title = ref<string | undefined>(undefined);

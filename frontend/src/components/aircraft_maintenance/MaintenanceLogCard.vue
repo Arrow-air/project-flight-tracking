@@ -105,7 +105,7 @@ import { ref } from 'vue';
 import type { 
 	MaintenanceLogData, 
 	MaintenanceLogType, 
-	UpdateMaintenanceLogInput 
+	// UpdateMaintenanceLogInput 
 } from '@/api/rest/aircraft_maintenance.api'
 import { updateMaintenanceLog, deleteMaintenanceLog } from '@/api/rest/aircraft_maintenance.api'
 
