@@ -1,17 +1,14 @@
-import { DataflashParserTS } from "../parser.ts";
-import type { ParsedLog, ParsedMessage } from "../types.ts";
+import { DataflashParserTS } from "../core/parser.ts";
+import type { ParsedLog, ParsedMessage } from "../core/types.ts";
+
+import { ParamExtractor, DefaultParamExtractor, ParamSummaryExtractor } from "./params.ts";
+import type { ParamRecord, DefaultParamRecord, ParamSummaryRecord } from "./params.ts";
+import { TimeExtractor, type TimeExtraction } from "./time.ts";
+import { ModeExtractor, type ModeRecord, type ModeExtractorOptions } from "./mode.ts";
 import {
-  ModeExtractor,
   PositionExtractor,
-  DefaultParamExtractor,
-  ParamExtractor,
-  type ParamsSummary,
-  type ModeExtractorOptions,
   type PositionExtractorOptions,
-  type ModeRecord,
   type PositionRecord,
-  type ParamRecord,
-  type DefaultParamRecord,
 } from "./index.ts";
 import type { EnrichOptions } from "../enrich/postprocess.ts";
 import { enrichParsedLog } from "../enrich/postprocess.ts";
@@ -58,9 +55,18 @@ export class DataflashDataExtractor {
   ): DataflashDataExtractor {
     const buffer = buf instanceof Uint8Array ? buf.buffer : buf;
     const parser = new DataflashParserTS(buffer);
-    const parsed = parser.parse(options.selectedMessages);
-    const finalParsed = options.enrich ? enrichParsedLog(parsed, options.enrich) : parsed;
+    const parsed: ParsedLog = parser.parse(options.selectedMessages);
+    const finalParsed: ParsedLog = options.enrich ? enrichParsedLog(parsed, options.enrich) : parsed;
+
     return new DataflashDataExtractor(finalParsed);
+  }
+
+  /**
+   * Get the parsed log from the extractor.
+   * @returns The parsed log.
+   */
+  getParsed(): ParsedLog {
+    return this.parsed;
   }
 
   /**
@@ -131,15 +137,23 @@ export class DataflashDataExtractor {
   /**
    * Convenience: get both current and default params together.
    */
-  extractParamsSummary(): ParamsSummary {
-    return {
-      params: this.extractParams(),
-      defaults: this.extractDefaultParams(),
-    };
+  extractParamsSummary(): ParamSummaryRecord[] {
+    const result = new ParamSummaryExtractor().extract(this.ctx());
+    return result?.data ?? [];
+  }
+
+  /**
+   * Extract flight/boot timing information derived from EV/ARM/PARM messages.
+   */
+  extractTime(): TimeExtraction | null {
+    const result = new TimeExtractor().extract(this.ctx());
+    return result?.data ?? null;
   }
 
   private ctx(): ExtractionContext {
-    return { parsed: this.parsed };
+    return { 
+      parsed: this.parsed 
+    };
   }
 }
 
@@ -149,3 +163,4 @@ function toArray<T>(field?: ParsedMessage[keyof ParsedMessage]): T[] | null {
   if (field instanceof Float64Array) return Array.from(field) as T[];
   return null;
 }
+

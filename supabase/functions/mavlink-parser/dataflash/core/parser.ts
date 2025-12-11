@@ -1,5 +1,6 @@
 import { DF_HEADER1, DF_HEADER2, DF_HEADER_LENGTH, FMT_TYPE_ID } from "./constants.ts";
 import type { FormatChar } from "./constants.ts";
+
 import { parseField } from "./binary.ts";
 import type {
   MessageTypeId, MessageTypeName,

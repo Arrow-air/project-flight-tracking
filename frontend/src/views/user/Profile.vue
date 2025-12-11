@@ -71,7 +71,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuthStore } from '@/features/auth/auth.store'
 
 const authStore = useAuthStore()
 

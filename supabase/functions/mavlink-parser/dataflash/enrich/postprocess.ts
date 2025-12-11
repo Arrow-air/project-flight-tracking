@@ -4,7 +4,7 @@ import {
   type UnitMessageMap,
   type UnitFieldDefinition,
 } from "./units.ts";
-import type { ParsedLog, ParsedMessage } from "../types.ts";
+import type { ParsedLog, ParsedMessage } from "../core/types.ts";
 
 export interface ModeEnrichmentOptions {
   messageName?: string; // Defaults to "MODE"
