@@ -24,11 +24,10 @@ USING (bucket_id = 'flight_logs' and (select auth.uid()) = owner_id::uuid)
 WITH CHECK (bucket_id = 'flight_logs' and (select auth.uid()) = owner_id::uuid);
 
 -- OPTIONAL: DELETE their own objects
-CREATE POLICY "owner can delete their flight logs"
-ON storage.objects
-FOR delete
-TO authenticated
-USING (bucket_id = 'flight_logs' and (select auth.uid()) = owner_id::uuid);
+CREATE POLICY "owner can delete their flight logs" ON storage.objects
+  FOR DELETE
+  TO authenticated
+  USING (bucket_id = 'flight_logs' and (select auth.uid()) = owner_id::uuid);
 
 
 

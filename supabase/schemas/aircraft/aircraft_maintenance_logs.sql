@@ -48,6 +48,10 @@ CREATE POLICY "Users can create maintenance logs" ON public.aircraft_maintenance
 FOR INSERT TO authenticated 
 WITH CHECK ((SELECT auth.uid()) = author_id);
 
+CREATE POLICY "Users can delete own maintenance logs" ON public.aircraft_maintenance_log
+  FOR DELETE 
+  TO authenticated 
+  USING ((SELECT auth.uid()) = author_id);
 
 -- =============================================================
 -- ADDED PRIVILEGES (broad access)

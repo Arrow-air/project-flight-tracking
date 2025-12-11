@@ -27,6 +27,11 @@ CREATE POLICY "Users can update own tags" ON public.tags
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = created_by_id)
 WITH CHECK ((SELECT auth.uid()) = created_by_id);
 
+CREATE POLICY "Users can delete own tags" ON public.tags
+  FOR DELETE 
+  TO authenticated 
+  USING ((SELECT auth.uid()) = created_by_id);
+
 -- Add updated_at trigger
 CREATE TRIGGER set_updated_at_tags
   BEFORE UPDATE ON public.tags

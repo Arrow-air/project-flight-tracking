@@ -154,9 +154,9 @@ export async function updateAircraft(id: string, input: UpdateAircraftInput): Pr
 
 // Delete aircraft (only own records)
 export async function deleteAircraft(id: string): Promise<void> {
-	const authStore = useAuthStore()
-	const operation = 'delete aircraft'
-	requireAuth(authStore, operation)
+	const authStore = useAuthStore();
+	const operation = 'delete aircraft';
+	requireAuth(authStore, operation);
 
 	await withErrorHandling(async () => {
 		const { error } = await supabase
@@ -164,7 +164,7 @@ export async function deleteAircraft(id: string): Promise<void> {
 			.delete()
 			.eq('id', id)
 
-		if (error) throw error
-	}, { operation, entity: ENTITY_NAME, authStore })
+		if (error) throw error;
+	}, { operation, entity: ENTITY_NAME, authStore });
 }
 

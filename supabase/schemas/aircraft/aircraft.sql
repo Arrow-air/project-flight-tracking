@@ -30,6 +30,11 @@ CREATE POLICY "Users can update own aircraft" ON public.aircraft
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = owner_id)
 WITH CHECK ((SELECT auth.uid()) = owner_id);
 
+CREATE POLICY "Users can delete own aircraft" ON public.aircraft 
+  FOR DELETE 
+  TO authenticated 
+  USING ((SELECT auth.uid()) = owner_id);
+
 CREATE TRIGGER set_updated_at_aircraft
   BEFORE UPDATE ON public.aircraft
   FOR EACH ROW

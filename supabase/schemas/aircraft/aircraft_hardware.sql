@@ -26,6 +26,8 @@ FOR SELECT TO authenticated USING (
   )
 );
 
+
+
 CREATE TRIGGER set_updated_at_aircraft_hardware
   BEFORE UPDATE ON public.aircraft_hardware
   FOR EACH ROW
