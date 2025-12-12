@@ -78,7 +78,7 @@ BEGIN
   END IF;
 
   -- Validate URL is a valid URL
-  IF v_normalized_url !~* '<|>' THEN -- No HTML, script tags
+  IF v_normalized_url ~* '<|>' THEN -- No HTML, script tags
     RAISE NOTICE 'URL contains HTML or script tags: %', v_normalized_url;
     RETURN FALSE;
   END IF;

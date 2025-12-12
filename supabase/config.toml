@@ -56,11 +56,20 @@ schema_paths = [
     # General DB Utilities
     "./schemas/utils/schema.sql",
     "./schemas/utils/functions/field_validators.sql",
+    "./schemas/utils/grants.sql",
+
+    # Users tables
+    "./schemas/users/types.sql",
+    "./schemas/users/tables.sql",
+    "./schemas/users/views.sql",
+    "./schemas/users/functions.sql",
+    "./schemas/users/policies.sql",
+    "./schemas/users/grants.sql",
 
     # Storage Buckets
     "./schemas/buckets/flight_logs.sql",
 
-    "./schemas/users/user_profiles.sql",
+    # "./schemas/users/user_profiles.sql",
     "./schemas/tags.sql",
 
     # # Organizations

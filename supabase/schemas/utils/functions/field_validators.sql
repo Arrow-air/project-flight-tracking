@@ -48,7 +48,6 @@ END;
 $$;
 
 
-
 -- Validate user-supplied URLs
 -- ========================================
 CREATE OR REPLACE FUNCTION utils.validate_url(p_url text)
@@ -90,8 +89,50 @@ BEGIN
   END IF;
 
   -- Validate URL is a valid URL
-  IF v_normalized_url !~* '<|>' THEN -- No HTML, script tags
+  IF v_normalized_url ~* '<|>' THEN -- No HTML, script tags
     RAISE NOTICE 'URL contains HTML or script tags: %', v_normalized_url;
+    RETURN FALSE;
+  END IF;
+
+  RETURN TRUE;
+END;
+$$;
+
+
+-- Validate arbitrary text for HTML, script tags, etc.
+CREATE OR REPLACE FUNCTION utils.validate_text(
+  p_text text,
+  p_max_length int DEFAULT 2048,
+  p_min_length int DEFAULT 0
+)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+IMMUTABLE -- Pure mathematical function
+STRICT -- Null input returns NULL
+PARALLEL SAFE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+DECLARE
+  v_normalized_text text;
+BEGIN
+
+  v_normalized_text := LOWER(TRIM(p_text));
+
+  -- URL must be of valid length [3-2048] characters
+  IF LENGTH(TRIM(v_normalized_text)) > p_max_length THEN
+    RAISE NOTICE 'Text is too long (max % characters): %', p_max_length, v_normalized_text;
+    RETURN FALSE;
+  END IF;
+
+  IF LENGTH(TRIM(v_normalized_text)) < p_min_length THEN
+    RAISE NOTICE 'Text is too short (min % characters): %', p_min_length, v_normalized_text;
+    RETURN FALSE;
+  END IF;
+
+  -- Validate text contains no HTML, script tags
+  IF v_normalized_text ~* '<|>' THEN
+    RAISE NOTICE 'Text contains HTML or script tags: %', v_normalized_text;
     RETURN FALSE;
   END IF;
 
