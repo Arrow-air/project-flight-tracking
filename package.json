@@ -1,9 +1,13 @@
 {
+  "name": "project-flight-tracking",
+  "repository": "https://github.com/Arrow-air/project-flight-tracking.git",
+  "author": "Kellan Cerveny <kjcerveny@gmail.com>",
   "license": "MIT",
   "scripts": {
     "seed": "npx tsx scripts/snaplet/seed.ts",
     "seed:sync": "npx @snaplet/seed sync",
-    "seed:init": "npx @snaplet/seed init ./scripts/snaplet"
+    "seed:init": "npx @snaplet/seed init ./scripts/snaplet",
+    "update-types": "bash scripts/db/update-types.sh"
   },
   "dependencies": {
     "supabase": "^2.34.3"

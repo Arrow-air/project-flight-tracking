@@ -53,11 +53,26 @@ enabled = true
 schema_paths = [
     "./schemas/core.sql",
 
+    # General DB Utilities
+    "./schemas/utils/schema.sql",
+    "./schemas/utils/functions/field_validators.sql",
+
+    # Storage Buckets
     "./schemas/buckets/flight_logs.sql",
 
     "./schemas/users/user_profiles.sql",
     "./schemas/tags.sql",
 
+    # # Organizations
+    # "./schemas/organizations/types.sql",
+    # "./schemas/organizations/tables.sql",
+    # "./schemas/organizations/views.sql",
+    # "./schemas/organizations/functions/org_rls_helpers.sql",
+    # "./schemas/organizations/functions/org_role_helpers.sql",
+    # "./schemas/organizations/policies.sql",
+    # "./schemas/organizations/grants.sql",
+
+    # Aircraft Tables
     "./schemas/aircraft/aircraft.sql",
     "./schemas/aircraft/aircraft_hardware.sql",
     "./schemas/aircraft/aircraft_maintenance_logs.sql",
