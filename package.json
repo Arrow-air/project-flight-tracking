@@ -10,6 +10,7 @@
     "update-types": "bash scripts/db/update-types.sh"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.51.2",
     "supabase": "^2.34.3"
   },
   "devDependencies": {
