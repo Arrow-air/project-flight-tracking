@@ -27,3 +27,8 @@ CREATE VIEW client_user_profiles
         user_ui.locale
     FROM public.user_profiles up
     INNER JOIN public.user_ui_settings user_ui ON up.id = user_ui.user_id;
+
+-- [!!!] Does not get picked up by diff tool.
+-- Must be set manually in migration files it seems.
+alter view public.client_user_profiles
+  set (security_invoker = on);
