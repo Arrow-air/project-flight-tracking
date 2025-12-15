@@ -51,18 +51,17 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { MaintenanceLogData, MaintenanceLogType } from '@/api/rest/aircraft_maintenance.api'
+import type { MaintenanceLogRow, MaintenanceLogType } from '@/api/rest/aircraft_maintenance.api'
 import { createMaintenanceLog } from '@/api/rest/aircraft_maintenance.api'
 
 const props = defineProps<{ aircraftId: string }>()
-const emit = defineEmits<{ (e: 'created', value: MaintenanceLogData): void }>()
+const emit = defineEmits<{ (e: 'created', value: MaintenanceLogRow): void }>()
 
 const types: MaintenanceLogType[] = ['build', 'maintenance', 'upgrade', 'repair', 'trouble-shooting', 'ground-run', 'other']
 
 const modalRef = ref<HTMLDialogElement | null>(null);
 const loading = ref(false);
 const error = ref('');
-// const form = ref<{ logType: MaintenanceLogType | ''; title: string; logDate: string; notes: string }>({ logType: '', title: '', logDate: '', notes: '' })
 
 const logType = ref<MaintenanceLogType>('build');
 const title = ref<string | undefined>(undefined);
@@ -76,15 +75,9 @@ function resetForm() {
     notes.value = '';
 }
 
-function open() {
-    modalRef.value?.showModal()
-}
-
-function close() {
-    modalRef.value?.close()
-}
-
-defineExpose({ open, close })
+function open() { modalRef.value?.showModal(); }
+function close() { modalRef.value?.close(); }
+defineExpose({ open, close });
 
 async function submit() {
     try {
@@ -92,12 +85,13 @@ async function submit() {
         error.value = ''
         if (!logType.value) throw new Error('Please choose a log type')
         if (!notes.value) throw new Error('Please enter some notes')
-        const created = await createMaintenanceLog(props.aircraftId, {
-            logType: logType.value,
+        const created = await createMaintenanceLog({
+            aircraft_id: props.aircraftId,
+            log_type: logType.value,
+            log_date: logDate.value,
             title: title.value,
-            logDate: logDate.value,
             notes: notes.value,
-        })
+        });
         emit('created', created);
         close();
     } catch (e: any) {

@@ -5,7 +5,7 @@
             Enter your new password below.
         </p>
 
-        <label class="form-control w-full">
+        <label class="form-control w-full mt-2">
             <span class="label">
                 <span class="label-text">New Password</span>
             </span>
@@ -14,7 +14,7 @@
                 autocomplete="new-password" required />
         </label>
 
-        <label class="form-control w-full">
+        <label class="form-control w-full mt-2">
             <span class="label">
                 <span class="label-text">Confirm New Password</span>
             </span>
@@ -36,11 +36,7 @@
             <span>{{ success }}</span>
         </div>
 
-        <div class="divider">OR</div>
-
-        <p class="text-sm text-base-content/70 text-center">
-            <a class="link link-primary" @click="emit('go-to-login')">← Back to Login</a>
-        </p>
+        
     </form>
 </template>
   
@@ -51,7 +47,6 @@ import { useAuth } from '@/modules/auth/useAuth';
   const emit = defineEmits<{
     (e: 'success', message: string): void;
     (e: 'error', message: string): void;
-    (e: 'go-to-login'): void;
     (e: 'invalid-session'): void;
   }>();
   

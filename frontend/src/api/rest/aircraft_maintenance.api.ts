@@ -1,80 +1,26 @@
 // Stateless API for aircraft maintenance logs
 
 import { supabase } from '@/lib/supabaseClient';
+import type { Tables, TablesInsert, TablesUpdate, Enums } from "@/lib/database.types";
 import { withErrorHandling, requireAuth } from '@/api/errorHandler';
 import { useAuth } from '@/modules/auth/useAuth';
 
-const ENTITY_NAME = 'aircraft_maintenance_log'
 
-// Matches public.maintenance_log_type enum
-export type MaintenanceLogType =
-  | 'build'
-  | 'maintenance'
-  | 'upgrade'
-  | 'repair'
-  | 'trouble-shooting'
-  | 'ground-run'
-  | 'other'
+const ENTITY_NAME = 'aircraft_maintenance_log';
 
-// DB row (snake_case)
-export interface MaintenanceLogRow {
-  id: string
-  created_at: string
-  updated_at: string
-  author_id: string | null
-  aircraft_id: string
-  log_type: MaintenanceLogType
-  log_date: string | null
-  title: string | null
-  notes: string | null
-}
+// Imported types from Supabase automatically generated types
+export type MaintenanceLogType = Enums<"maintenance_log_type">;
+export type MaintenanceLogRow = Tables<"aircraft_maintenance_log">;
+export type MaintenanceLogInsert = TablesInsert<"aircraft_maintenance_log">;
+export type MaintenanceLogUpdate = TablesUpdate<"aircraft_maintenance_log">;
+export type TMaintenanceLogID = Tables<"aircraft_maintenance_log">["id"];
 
-// App-facing model (camelCase)
-export interface MaintenanceLogData {
-  id: string
-  createdAt: string
-  updatedAt: string
-  authorId: string | null
-  aircraftId: string
-  logType: MaintenanceLogType
-  logDate?: string | null
-  title?: string | null
-  notes: string | null
-}
-
-export type CreateMaintenanceLogInput = {
-  logType: MaintenanceLogType
-  logDate?: string | null
-  title?: string | null
-  notes?: string | null
-}
-
-export type UpdateMaintenanceLogInput = {
-  logType?: MaintenanceLogType
-  logDate?: string | null
-  title?: string | null
-  notes?: string | null
-}
-
-function mapRowToData(row: MaintenanceLogRow): MaintenanceLogData {
-  return {
-    id: row.id,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    authorId: row.author_id,
-    aircraftId: row.aircraft_id,
-    logType: row.log_type,
-    logDate: row.log_date,
-    title: row.title,
-    notes: row.notes,
-  }
-}
 
 // List logs for an aircraft with optional type filter and sort order (default newest -> oldest)
 export async function listMaintenanceLogs(
   aircraftId: string,
   options: { type?: MaintenanceLogType; order?: 'asc' | 'desc' } = {}
-): Promise<MaintenanceLogData[]> {
+): Promise<MaintenanceLogRow[]> {
   const operation = 'list maintenance logs'
   requireAuth(operation)
   if (!aircraftId) throw new Error('aircraftId is required')
@@ -90,19 +36,21 @@ export async function listMaintenanceLogs(
       query = query.eq('log_type', options.type)
     }
 
-    const { data, error } = await query
-    if (error) throw error
-    return (data as MaintenanceLogRow[]).map(mapRowToData)
+    const { data, error } = await query;
+    if (error) throw error;
+    return data as MaintenanceLogRow[];
   }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 // Get a single log by id
-export async function getMaintenanceLog(id: string): Promise<MaintenanceLogData> {
-  const operation = 'get maintenance log'
-  requireAuth(operation)
-  if (!id) throw new Error('id is required')
+export async function getMaintenanceLog(
+  id: TMaintenanceLogID
+): Promise<MaintenanceLogRow> {
+  const operation = 'get maintenance log';
+  requireAuth(operation);
+  if (!id) throw new Error('id is required');
 
   const result = await withErrorHandling(async () => {
     const { data, error } = await supabase
@@ -111,74 +59,60 @@ export async function getMaintenanceLog(id: string): Promise<MaintenanceLogData>
       .eq('id', id)
       .single()
 
-    if (error) throw error
-    return mapRowToData(data as MaintenanceLogRow)
+    if (error) throw error;
+    return data as MaintenanceLogRow;
   }, { operation, entity: ENTITY_NAME })
 
-  if (!result) throw new Error('Operation cancelled')
-  return result
+  if (!result) throw new Error('Operation cancelled');
+  return result;
 }
 
 // Create a new maintenance log for an aircraft
 export async function createMaintenanceLog(
-  aircraftId: string,
-  input: CreateMaintenanceLogInput
-): Promise<MaintenanceLogData> {
+  input: MaintenanceLogInsert
+): Promise<MaintenanceLogRow> {
   const operation = 'create maintenance log'
   requireAuth(operation)
-  if (!aircraftId) throw new Error('aircraftId is required')
-  if (!input?.logType) throw new Error('logType is required')
+  if (!input?.aircraft_id) throw new Error('aircraft_id is required')
+  if (!input?.log_type) throw new Error('log_type is required')
+
+  input.author_id = useAuth().userId ?? null; // Logged-in user is author
 
   const result = await withErrorHandling(async () => {
     const { data, error } = await supabase
       .from(ENTITY_NAME)
-      .insert([
-        {
-          aircraft_id: aircraftId,
-          author_id: useAuth().userId ?? null,
-          log_type: input.logType,
-          log_date: input.logDate ?? null,
-          title: input.title ?? null,
-          notes: input.notes ?? null,
-        },
-      ])
+      .insert(input)
       .select('*')
-      .single()
+      .single();
 
-    if (error) throw error
-    return mapRowToData(data as MaintenanceLogRow)
+    if (error) throw error;
+    return data as MaintenanceLogRow;
   }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
-  return result
+  return result;
 }
 
 // Update an existing maintenance log (author can update own logs)
 export async function updateMaintenanceLog(
-  id: string,
-  input: UpdateMaintenanceLogInput
-): Promise<MaintenanceLogData> {
+  id: TMaintenanceLogID,
+  update: MaintenanceLogUpdate
+): Promise<MaintenanceLogRow> {
   const operation = 'update maintenance log'
-  requireAuth(operation)
-  if (!id) throw new Error('id is required')
-
-  const payload: Partial<MaintenanceLogRow> = {
-    log_type: input.logType ?? (undefined as any),
-    log_date: input.logDate ?? (undefined as any),
-    title: input.title ?? (undefined as any),
-    notes: input.notes ?? (undefined as any),
-  }
+  requireAuth(operation);
+  if (!id) throw new Error('id is required');
+  if (update.id && update.id !== id) throw new Error('id mismatch');
 
   const result = await withErrorHandling(async () => {
     const { data, error } = await supabase
       .from(ENTITY_NAME)
-      .update(payload)
+      .update(update)
       .eq('id', id)
       .select('*')
       .single()
 
-    if (error) throw error
-    return mapRowToData(data as MaintenanceLogRow)
+    if (error) throw error;
+    return data as MaintenanceLogRow;
   }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
@@ -186,7 +120,7 @@ export async function updateMaintenanceLog(
 }
 
 // Delete a maintenance log (author can delete own logs)
-export async function deleteMaintenanceLog(id: string): Promise<void> {
+export async function deleteMaintenanceLog(id: TMaintenanceLogID): Promise<void> {
   const operation = 'delete maintenance log'
   requireAuth(operation);
   if (!id) throw new Error('id is required')
@@ -196,6 +130,8 @@ export async function deleteMaintenanceLog(id: string): Promise<void> {
       .from(ENTITY_NAME)
       .delete()
       .eq('id', id)
+      .select()
+      .single();
 
     if (error) throw error
   }, { operation, entity: ENTITY_NAME })

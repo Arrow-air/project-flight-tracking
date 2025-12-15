@@ -4,7 +4,7 @@
 		<div class="flex items-end justify-between mb-6">
 			<div>
 				<h1 class="text-3xl font-bold">{{ aircraft?.name || 'Aircraft' }}</h1>
-				<p class="text-base-content/70">Serial: {{ aircraft?.serialNumber }}</p>
+				<p class="text-base-content/70">Serial: {{ aircraft?.serial_number }}</p>
 			</div>
 			<div class="flex gap-2">
 				<RouterLink class="btn" :to="{ name: 'AircraftList' }">Back</RouterLink>
@@ -36,15 +36,15 @@
 							</div>
 							<div>
 								<div class="text-sm text-base-content/70">Type</div>
-								<div>{{ aircraft.aircraftType || '—' }}</div>
+								<div>{{ aircraft.aircraft_type || '—' }}</div>
 							</div>
 							<div>
 								<div class="text-sm text-base-content/70">Serial number</div>
-								<div>{{ aircraft.serialNumber }}</div>
+								<div>{{ aircraft.serial_number }}</div>
 							</div>
 							<div>
 								<div class="text-sm text-base-content/70">Owner</div>
-								<div class="truncate">{{ aircraft.ownerId || '—' }}</div>
+								<div class="truncate">{{ aircraft.owner_id || '—' }}</div>
 							</div>
 						</div>
 						<div>
@@ -52,9 +52,9 @@
 							<p class="whitespace-pre-wrap">{{ aircraft.notes || '—' }}</p>
 						</div>
 						<div class="text-sm text-base-content/60">
-							<span>Created: {{ formatDate(aircraft.createdAt) }}</span>
+							<span>Created: {{ formatDate(aircraft.created_at) }}</span>
 							<span class="mx-2">·</span>
-							<span>Updated: {{ formatDate(aircraft.updatedAt) }}</span>
+							<span>Updated: {{ formatDate(aircraft.updated_at) }}</span>
 						</div>
 					</template>
 
@@ -67,11 +67,11 @@
 							</label>
 							<label class="form-control w-full">
 								<span class="label"><span class="label-text">Type</span></span>
-								<input v-model.trim="form.aircraftType" class="input input-bordered w-full" />
+								<input v-model.trim="form.aircraft_type" class="input input-bordered w-full" />
 							</label>
 							<label class="form-control w-full">
 								<span class="label"><span class="label-text">Serial number</span></span>
-								<input v-model.trim="form.serialNumber" class="input input-bordered w-full" required />
+								<input v-model.trim="form.serial_number" class="input input-bordered w-full" required />
 							</label>
 							<label class="form-control w-full">
 								<span class="label"><span class="label-text">Notes</span></span>
@@ -122,14 +122,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { AircraftData, UpdateAircraftInput } from '@/api/rest/aircraft.api'
+import type { AircraftRow, AircraftUpdate } from '@/api/rest/aircraft.api'
 import { getAircraft, updateAircraft, deleteAircraft } from '@/api/rest/aircraft.api'
 import MaintenanceLogsSection from '@/components/aircraft_maintenance/MaintenanceLogsSection.vue';
 
 const route = useRoute()
 const router = useRouter()
 
-const aircraft = ref<AircraftData | null>(null)
+const aircraft = ref<AircraftRow | null>(null)
 const loaded = ref(false)
 const editMode = ref(false)
 const saving = ref(false)
@@ -137,7 +137,7 @@ const deleting = ref(false)
 const error = ref('')
 const success = ref('')
 
-const form = ref<UpdateAircraftInput>({})
+const form = ref<AircraftUpdate>({ id: '', name: '', aircraft_type: '', serial_number: '', notes: '' })
 const deleteDialogRef = ref<HTMLDialogElement | null>(null)
 
 function formatDate(iso: string): string {
@@ -167,8 +167,8 @@ function enableEdit() {
 	editMode.value = true
 	form.value = {
 		name: aircraft.value.name || undefined,
-		aircraftType: aircraft.value.aircraftType || undefined,
-		serialNumber: aircraft.value.serialNumber,
+		aircraft_type: aircraft.value.aircraft_type || undefined,
+		serial_number: aircraft.value.serial_number,
 		notes: aircraft.value.notes || undefined,
 	}
 }

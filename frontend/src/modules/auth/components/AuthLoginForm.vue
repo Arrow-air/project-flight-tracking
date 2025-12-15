@@ -23,8 +23,13 @@
 
 
         <div class="divider">OR</div>
-        <OAuthGitHub :redirectTo="redirectTo" class="w-full" />
 
+        <p class="text-sm text-base-content/70 text-center">
+            Coming soon...
+        </p>
+        <OAuthGitHub disabled :redirectTo="redirectTo" class="w-full" />
+
+        <!-- Login error message -->
         <div v-if="error" class="alert alert-error">
             <span>{{ error }}</span>
         </div>

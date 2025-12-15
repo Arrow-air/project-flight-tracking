@@ -17,7 +17,7 @@ CREATE TABLE public.aircraft_maintenance_log (
 
   -- Relationships
   author_id uuid REFERENCES public.user_profiles(id) ON DELETE SET NULL,
-  aircraft_id uuid REFERENCES public.aircraft(id) ON DELETE CASCADE,
+  aircraft_id uuid NOT NULL REFERENCES public.aircraft(id) ON DELETE CASCADE,
 
   -- Data
   log_type public.maintenance_log_type NOT NULL,
@@ -48,7 +48,7 @@ FOR SELECT TO authenticated USING (
 
 CREATE POLICY "Users can create maintenance logs" ON public.aircraft_maintenance_log 
 FOR INSERT TO authenticated 
-WITH CHECK ((SELECT auth.uid()) = author_id);
+WITH CHECK ((SELECT auth.role()) = 'authenticated');
 
 CREATE POLICY "Users can delete own maintenance logs" ON public.aircraft_maintenance_log
   FOR DELETE 

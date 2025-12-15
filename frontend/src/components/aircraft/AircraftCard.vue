@@ -3,9 +3,9 @@
         <div class="card-body">
             <div class="flex items-start justify-between gap-2">
                 <h3 class="card-title truncate">{{ aircraft.name || 'Unnamed aircraft' }}</h3>
-                <span class="badge badge-outline">{{ aircraft.aircraftType || '—' }}</span>
+                <span class="badge badge-outline">{{ aircraft.aircraft_type || '—' }}</span>
             </div>
-            <p class="text-sm text-base-content/70">Serial: {{ aircraft.serialNumber }}</p>
+            <p class="text-sm text-base-content/70">Serial: {{ aircraft.serial_number }}</p>
             <p v-if="aircraft.notes" class="text-sm line-clamp-2">{{ aircraft.notes }}</p>
             <div class="card-actions justify-end mt-2">
                 <slot name="actions"></slot>
@@ -15,9 +15,9 @@
 </template>
 
 <script setup lang="ts">
-import type { AircraftData } from '@/api/rest/aircraft.api';
+import type { AircraftRow } from '@/api/rest/aircraft.api';
 
-defineProps<{ aircraft: AircraftData }>()
+defineProps<{ aircraft: AircraftRow }>()
 </script>
 
 <style scoped></style>

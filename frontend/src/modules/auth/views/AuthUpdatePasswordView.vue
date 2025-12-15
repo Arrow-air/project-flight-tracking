@@ -2,11 +2,16 @@
 	<div class="min-h-screen grid place-items-center p-6">
 		<div class="card bg-base-100 shadow-xl w-full max-w-md">
 			<div class="card-body">
-				<AuthResetPasswordForm
-					@go-to-login="handleGoToLogin"
+				<AuthUpdatePasswordForm
 					@success="handleSuccess"
 					@error="handleError"
 					@invalid-session="handleInvalidSession" />
+
+					<div class="divider">OR</div>
+
+				<p class="text-sm text-base-content/70 text-center">
+					<a class="link link-primary" @click="handleGoToLogin">← Back to Login</a>
+				</p>
 			</div>
 		</div>
 	</div>
@@ -14,7 +19,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import AuthResetPasswordForm from '@/modules/auth/components/AuthResetPasswordForm.vue'
+import AuthUpdatePasswordForm from '@/modules/auth/components/AuthUpdatePasswordForm.vue'
 
 const router = useRouter()
 
@@ -25,8 +30,8 @@ function handleGoToLogin() {
 async function handleSuccess() {
 	// Wait a bit before redirecting to login
 	const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-	await sleep(2000)
-	router.push({ name: 'Login' })
+	await sleep(2000);
+	router.push({ name: 'Login' });
 }
 
 function handleError() {
@@ -36,7 +41,7 @@ function handleError() {
 
 function handleInvalidSession() {
 	// Could redirect to forgot password or show a message
-	console.warn('Invalid reset session')
+	console.warn('Invalid reset session');
 }
 </script>
 

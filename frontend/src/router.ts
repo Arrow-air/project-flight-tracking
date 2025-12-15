@@ -2,10 +2,11 @@ import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { useAuthStore } from '@/modules/auth/auth.store';
 
 import { authRoutes } from '@/modules/auth/auth.routes';
+import { userRoutes } from '@/modules/users/users.routes';
 
 const routes: Array<RouteRecordRaw> = [
 
-    // Auth routes (no layout)
+    // Routed views not under default layout
     ...authRoutes,
 
     // App with default layout
@@ -14,7 +15,9 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/layouts/DefaultLayout.vue'),
         children: [
             { path: '', name: 'Home', component: () => import('@/views/Home.vue'), meta: { requiresAuth: false } },
-            { path: 'profile', name: 'Profile', component: () => import('@/views/user/Profile.vue'), meta: { requiresAuth: true } },
+
+            // User Profile Routes
+            ...userRoutes,
 
             // Aircraft Pages
             { path: 'aircraft', name: 'AircraftList', component: () => import('@/views/aircraft/ListAircraftPage.vue'), meta: { requiresAuth: true } },

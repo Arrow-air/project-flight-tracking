@@ -40,7 +40,7 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
-import { listMaintenanceLogs, type MaintenanceLogData, type MaintenanceLogType } from '@/api/rest/aircraft_maintenance.api';
+import { listMaintenanceLogs, type MaintenanceLogRow, type MaintenanceLogType } from '@/api/rest/aircraft_maintenance.api';
 import MaintenanceLogCard from '@/components/aircraft_maintenance/MaintenanceLogCard.vue';
 import CreateMaintenanceLogModal from '@/components/aircraft_maintenance/CreateMaintenanceLogModal.vue';
 
@@ -48,7 +48,7 @@ const props = defineProps<{ aircraftId: string }>()
 
 const types: MaintenanceLogType[] = ['build', 'maintenance', 'upgrade', 'repair', 'trouble-shooting', 'ground-run', 'other']
 
-const logs = ref<MaintenanceLogData[]>([])
+const logs = ref<MaintenanceLogRow[]>([])
 const loading = ref(false)
 const error = ref('')
 const filters = reactive<{ type?: MaintenanceLogType; order: 'asc' | 'desc' }>({ type: undefined, order: 'desc' })
@@ -67,7 +67,7 @@ async function reload() {
     }
 }
 
-function handleUpdated(updated: MaintenanceLogData) {
+function handleUpdated(updated: MaintenanceLogRow) {
     const idx = logs.value.findIndex((l) => l.id === updated.id)
     if (idx !== -1) logs.value[idx] = updated
 }
@@ -80,7 +80,7 @@ function openCreateModal() {
     createModalRef.value?.open()
 }
 
-function handleCreated(newLog: MaintenanceLogData) {
+function handleCreated(newLog: MaintenanceLogRow) {
     // Prepend when newest first, append when oldest first
     if (filters.order === 'desc') {
         logs.value = [newLog, ...logs.value]

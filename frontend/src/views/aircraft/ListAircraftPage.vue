@@ -36,12 +36,12 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { listAircraft, type AircraftData } from '@/api/rest/aircraft.api'
+import { listAircraft, type AircraftRow } from '@/api/rest/aircraft.api'
 import CreateAircraftCard from '@/components/aircraft/CreateAircraftCard.vue'
 import AircraftCard from '@/components/aircraft/AircraftCard.vue'
 import CreateAircraftModal from '@/components/aircraft/CreateAircraftModal.vue'
 
-const aircraft = ref<AircraftData[]>([])
+const aircraft = ref<AircraftRow[]>([])
 const error = ref('')
 const createModalRef = ref<InstanceType<typeof CreateAircraftModal> | null>(null)
 
@@ -58,7 +58,7 @@ function openCreateModal() {
 	createModalRef.value?.open()
 }
 
-async function handleCreated(newAircraft: AircraftData) {
+async function handleCreated(newAircraft: AircraftRow) {
 	// Optimistically add to the top
 	aircraft.value = [newAircraft, ...aircraft.value]
 }

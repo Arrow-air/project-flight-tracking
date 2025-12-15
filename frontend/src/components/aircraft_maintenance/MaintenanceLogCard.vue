@@ -10,17 +10,17 @@
                     <div class="flex items-center gap-2">
                         <h3 v-if="log.title" class="card-title text-base">{{ log.title }}</h3>
                         <h3 v-else class="card-title text-base">Maintenance log</h3>
-                        <span class="badge badge-outline">{{ log.logType }}</span>
+                        <span class="badge badge-outline">{{ log.log_type }}</span>
                         <span class="badge badge-outline badge-primary">
-                            Date: {{ formatDate(log.logDate || '') }}
+                            Date: {{ formatDate(log.log_date || '') }}
                         </span>
                     </div>
 
                     <!-- Log Create/Update Date -->
                     <div class="text-xs text-base-content/70">
-                        <span>Log Created: {{ formatDate(log.createdAt) }}</span>
+                        <span>Log Created: {{ formatDate(log.created_at) }}</span>
                         <span class="mx-1">·</span>
-                        <span>Log Updated: {{ formatDate(log.updatedAt) }}</span>
+                        <span>Log Updated: {{ formatDate(log.updated_at) }}</span>
                     </div>
                 </div>
 
@@ -104,16 +104,20 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import type {
-    MaintenanceLogData,
     MaintenanceLogType,
+    TMaintenanceLogID, MaintenanceLogRow,
     // UpdateMaintenanceLogInput
 } from '@/api/rest/aircraft_maintenance.api'
 import { updateMaintenanceLog, deleteMaintenanceLog } from '@/api/rest/aircraft_maintenance.api'
 
 const props = defineProps<{
-    log: MaintenanceLogData
+    log: MaintenanceLogRow
 }>();
-const emit = defineEmits<{ (e: 'updated', value: MaintenanceLogData): void; (e: 'deleted', id: string): void }>()
+
+const emit = defineEmits<{ 
+    (e: 'updated', value: MaintenanceLogRow): void; 
+    (e: 'deleted', id: TMaintenanceLogID): void 
+}>()
 
 const types: MaintenanceLogType[] = ['build', 'maintenance', 'upgrade', 'repair', 'trouble-shooting', 'ground-run', 'other'];
 
@@ -123,14 +127,14 @@ const deleting = ref(false);
 const error = ref('');
 const deleteDialogRef = ref<HTMLDialogElement | null>(null);
 
-const formLogType = ref<MaintenanceLogType>(props.log.logType);
-const formLogDate = ref<string | undefined>(props.log.logDate ?? undefined);
+const formLogType = ref<MaintenanceLogType>(props.log.log_type);
+const formLogDate = ref<string | undefined>(props.log.log_date ?? undefined);
 const formTitle = ref<string | undefined>(props.log.title ?? undefined);
 const formNotes = ref<string | undefined>(props.log.notes ?? undefined);
 
 function resetForm() {
-    formLogType.value = props.log.logType;
-    formLogDate.value = props.log.logDate ?? undefined;
+    formLogType.value = props.log.log_type;
+    formLogDate.value = props.log.log_date ?? undefined;
     formTitle.value = props.log.title ?? undefined;
     formNotes.value = props.log.notes ?? undefined;
 }
@@ -161,8 +165,8 @@ async function save() {
         saving.value = true
         error.value = '';
         const updated = await updateMaintenanceLog(props.log.id, {
-            logType: formLogType.value,
-            logDate: formLogDate.value ?? undefined,
+            log_type: formLogType.value,
+            log_date: formLogDate.value ?? undefined,
             title: formTitle.value ?? undefined,
             notes: formNotes.value ?? undefined,
         })
@@ -177,7 +181,7 @@ async function save() {
 
 function openDeleteModal() { deleteDialogRef.value?.showModal(); }
 
-async function confirmDelete() {
+async function confirmDelete(): Promise<void> {
     try {
         deleting.value = true;
         error.value = '';

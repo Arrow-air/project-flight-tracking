@@ -9,12 +9,12 @@
                 </label>
                 <label class="form-control w-full">
                     <span class="label"><span class="label-text">Type</span></span>
-                    <input v-model.trim="form.aircraftType" class="input input-bordered w-full"
+                    <input v-model.trim="form.aircraft_type" class="input input-bordered w-full"
                         placeholder="e.g. Cessna 172" />
                 </label>
                 <label class="form-control w-full">
                     <span class="label"><span class="label-text">Serial number</span></span>
-                    <input v-model.trim="form.serialNumber" class="input input-bordered w-full" required />
+                    <input v-model.trim="form.serial_number" class="input input-bordered w-full" required />
                 </label>
                 <label class="form-control w-full">
                     <span class="label"><span class="label-text">Notes</span></span>
@@ -38,15 +38,15 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
-import type { CreateAircraftInput, AircraftData } from '@/api/rest/aircraft.api';
+import type { AircraftInsert, AircraftRow } from '@/api/rest/aircraft.api';
 import { createAircraft } from '@/api/rest/aircraft.api';
 
-const emit = defineEmits<{ (e: 'created', value: AircraftData): void }>();
+const emit = defineEmits<{ (e: 'created', value: AircraftRow): void }>();
 
 const modalRef = ref<HTMLDialogElement | null>(null);
 const loading = ref(false);
 const error = ref('');
-const form = reactive<CreateAircraftInput>({ name: '', aircraftType: '', serialNumber: '', notes: '' });
+const form = reactive<AircraftInsert>({ name: '', aircraft_type: '', serial_number: '', notes: '' });
 
 function open() { modalRef.value?.showModal(); }
 function close() { modalRef.value?.close(); }
@@ -60,15 +60,15 @@ async function submit() {
         error.value = '';
         const created = await createAircraft({
             name: form.name || undefined,
-            aircraftType: form.aircraftType || undefined,
-            serialNumber: form.serialNumber,
+            aircraft_type: form.aircraft_type || undefined,
+            serial_number: form.serial_number,
             notes: form.notes || undefined,
         })
         emit('created', created);
         close();
         form.name = '';
-        form.aircraftType = '';
-        form.serialNumber = '';
+        form.aircraft_type = '';
+        form.serial_number = '';
         form.notes = '';
     } catch (e: any) {
         error.value = e?.message || 'Failed to create aircraft';
