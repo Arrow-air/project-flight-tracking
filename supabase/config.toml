@@ -85,10 +85,18 @@ schema_paths = [
     "./schemas/aircraft/aircraft_hardware.sql",
     "./schemas/aircraft/aircraft_maintenance_logs.sql",
 
-    "./schemas/flights/flight_legs.sql",
-    "./schemas/flights/flight_notes.sql",
-    "./schemas/flights/flight_leg_logs.sql",
-    "./schemas/flights/flight_leg_tags.sql",
+    # Flights Tables
+    "./schemas/flights/types.sql",
+    "./schemas/flights/tables.sql",
+    "./schemas/flights/views.sql",
+    "./schemas/flights/functions.sql",
+    "./schemas/flights/policies.sql",
+    # "./schemas/flights/grants.sql",
+
+    # "./schemas/flights/flight_legs.sql",
+    # "./schemas/flights/flight_notes.sql",
+    # "./schemas/flights/flight_leg_logs.sql",
+    # "./schemas/flights/flight_leg_tags.sql",
 ]
 
 [db.seed]

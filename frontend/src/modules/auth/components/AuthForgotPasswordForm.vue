@@ -81,7 +81,7 @@ async function handleForgotPassword() {
             return;
         }
 
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email.value)) {
             const message = 'Please enter a valid email address';
             error.value = message;

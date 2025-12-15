@@ -24,7 +24,7 @@ FOR SELECT TO authenticated USING ((SELECT auth.uid()) = owner_id);
 
 CREATE POLICY "Authenticated users can create aircraft" ON public.aircraft 
 FOR INSERT TO authenticated 
-WITH CHECK ((SELECT auth.uid()));
+WITH CHECK (true);
 
 CREATE POLICY "Users can update own aircraft" ON public.aircraft 
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = owner_id)
