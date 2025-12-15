@@ -71,17 +71,17 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useAuthStore } from '@/features/auth/auth.store'
+import { useAuthStore } from '@/modules/auth/auth.store'
 
 const authStore = useAuthStore()
 
-const userEmail = computed(() => authStore.userEmail)
-const userId = computed(() => authStore.userId)
-const authLoading = computed(() => authStore.loading)
+const userEmail = computed(() => authStore.userEmail);
+const userId = computed(() => authStore.userId ?? '');
+const authLoading = computed(() => authStore.loading);
 const displayName = computed<string>(() => {
 	// Attempt to use Supabase user metadata full_name if present
 	// @ts-ignore - optional chaining into user metadata may not be typed
-	return (authStore.user as any)?.user_metadata?.full_name || ''
+	return (authStore.user as any)?.user_metadata?.full_name || '';
 })
 
 const newPassword = ref('')

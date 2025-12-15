@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import { supabase } from '@/lib/supabaseClient';
 import router from '@/router';
+
 import * as authApi from './auth.api';
 import type { 
   User, Session, 
@@ -11,6 +12,7 @@ import type {
 import {
   getAuthEmailRedirectURL,
   getPasswordResetRedirectURL,
+  // getOAuthRedirectURL,
 } from './auth.helpers';
 
 export const useAuthStore = defineStore('auth', () => {
@@ -82,6 +84,14 @@ export const useAuthStore = defineStore('auth', () => {
   async function signInWithOAuth(credentials: SignInWithOAuthCredentials): Promise<void> {
     try {
       loading.value = true;
+      
+      // // Set default redirect to for OAuth, if not provided.
+      // const defaultRedirectTo = getOAuthRedirectURL();
+      // if (!credentials.options) { credentials.options = {}; }
+      // if (!credentials.options?.redirectTo) {
+      //   credentials.options.redirectTo = defaultRedirectTo; 
+      // }
+
       await authApi.signInWithOAuth(credentials);
       // Note: OAuth redirects the user, so we don't update state here
       // The auth state change listener will handle the session update after redirect

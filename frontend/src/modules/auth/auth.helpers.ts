@@ -44,6 +44,11 @@ export function getPasswordResetRedirectURL(): string {
     return getRedirectURL('/reset-password');
 }
 
+/** Default OAuth redirect for Supabase OAuth callbacks. */
+export function getOAuthRedirectURL(): string {
+    return getRedirectURL('/auth/v1/callback');
+}
+
 /**
  * Ensures the user is authenticated, throwing an error if not
  * @param operation - Operation name for error messages
