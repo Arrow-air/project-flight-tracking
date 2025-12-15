@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/modules/auth/auth.store';
+import { useAuth } from '@/modules/auth/useAuth';
 
 const ENTITY_NAME = 'flight_leg_logs';
 const DEFAULT_BUCKET = 'flight_logs';
@@ -61,9 +61,8 @@ export async function listFlightLogs(
   flightLegId: string,
   options: { order?: 'asc' | 'desc' } = {}
 ): Promise<FlightLogData[]> {
-  const authStore = useAuthStore()
   const operation = 'list flight logs'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!flightLegId) throw new Error('flightLegId is required')
 
   const result = await withErrorHandling(async () => {
@@ -75,15 +74,14 @@ export async function listFlightLogs(
 
     if (error) throw error
     return (data as FlightLogRow[]).map(mapRowToData)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 export async function getFlightLog(id: string): Promise<FlightLogData> {
-  const authStore = useAuthStore()
   const operation = 'get flight log'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
   if (!id) throw new Error('id is required')
 
   const result = await withErrorHandling(async () => {
@@ -95,7 +93,7 @@ export async function getFlightLog(id: string): Promise<FlightLogData> {
 
     if (error) throw error
     return mapRowToData(data as FlightLogRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -127,9 +125,8 @@ export async function uploadFlightLog(
   file: File,
   options: { bucket?: string, notes?: string} = {}
 ): Promise<FlightLogData> {
-  const authStore = useAuthStore()
   const operation = 'upload flight log'
-  requireAuth(authStore, operation);
+  requireAuth(operation);
   if (!flightLegId) throw new Error('flightLegId is required');
   if (!file) throw new Error('file is required');
 
@@ -164,7 +161,7 @@ export async function uploadFlightLog(
       .insert([
         {
           flight_leg_id: flightLegId,
-          uploaded_by_id: authStore.userId,
+          uploaded_by_id: useAuth().userId ?? null,
           filename: safe,
           notes,
           size_bytes: sizeBytes,
@@ -179,16 +176,15 @@ export async function uploadFlightLog(
 
     if (error) throw error
     return mapRowToData(data as FlightLogRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
 }
 
 export async function deleteFlightLog(id: string): Promise<void> {
-  const authStore = useAuthStore();
   const operation = 'delete flight log';
-  requireAuth(authStore, operation);
+  requireAuth(operation);
   if (!id) throw new Error('id is required');
 
   await withErrorHandling(async () => {
@@ -211,7 +207,7 @@ export async function deleteFlightLog(id: string): Promise<void> {
       .delete()
       .eq('id', id)
     if (error) throw error;
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 }
 
 export async function getSignedUrl(objectPath: string, expiresInSeconds = 3600, bucket = DEFAULT_BUCKET): Promise<string> {
@@ -221,7 +217,7 @@ export async function getSignedUrl(objectPath: string, expiresInSeconds = 3600, 
     if (error) throw error;
     return data?.signedUrl || ''
   }, { operation, entity: ENTITY_NAME })
-  return result || ''
+  return result || '';
 }
 
 

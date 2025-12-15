@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient';
 import { withErrorHandling, requireAuth } from '@/api/errorHandler';
-import { useAuthStore } from '@/modules/auth/auth.store';
+import { useAuth } from '@/modules/auth/useAuth';
 
 const ENTITY_NAME = 'aircraft'
 
@@ -54,9 +54,8 @@ function mapRowToData(row: AircraftRow): AircraftData {
 
 // List current user's aircraft
 export async function listAircraft(): Promise<AircraftData[]> {
-  const authStore = useAuthStore()
   const operation = 'list aircraft'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
 
   const result = await withErrorHandling(async () => {
     const { data, error } = await supabase
@@ -66,16 +65,15 @@ export async function listAircraft(): Promise<AircraftData[]> {
 
     if (error) throw error
     return (data as AircraftRow[]).map(mapRowToData)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 // Get one by id
 export async function getAircraft(id: string): Promise<AircraftData> {
-  const authStore = useAuthStore()
   const operation = 'get aircraft'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
 
   const result = await withErrorHandling(async () => {
     const { data, error } = await supabase
@@ -86,7 +84,7 @@ export async function getAircraft(id: string): Promise<AircraftData> {
 
     if (error) throw error
     return mapRowToData(data as AircraftRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -94,9 +92,8 @@ export async function getAircraft(id: string): Promise<AircraftData> {
 
 // Create new aircraft
 export async function createAircraft(input: CreateAircraftInput): Promise<AircraftData> {
-  const authStore = useAuthStore()
   const operation = 'create aircraft'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
 
   if (!input?.serialNumber) throw new Error('serialNumber is required')
 
@@ -109,7 +106,7 @@ export async function createAircraft(input: CreateAircraftInput): Promise<Aircra
           aircraft_type: input.aircraftType ?? null,
           notes: input.notes ?? null,
           serial_number: input.serialNumber,
-          owner_id: authStore.userId,
+          owner_id: useAuth().userId ?? null,
         },
       ])
       .select('*')
@@ -117,7 +114,7 @@ export async function createAircraft(input: CreateAircraftInput): Promise<Aircra
 
     if (error) throw error
     return mapRowToData(data as AircraftRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -125,9 +122,8 @@ export async function createAircraft(input: CreateAircraftInput): Promise<Aircra
 
 // Update aircraft (only own records)
 export async function updateAircraft(id: string, input: UpdateAircraftInput): Promise<AircraftData> {
-  const authStore = useAuthStore()
   const operation = 'update aircraft'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
 
   const payload: Partial<AircraftRow> = {
     name: input.name ?? undefined as any,
@@ -146,7 +142,7 @@ export async function updateAircraft(id: string, input: UpdateAircraftInput): Pr
 
     if (error) throw error
     return mapRowToData(data as AircraftRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -154,9 +150,8 @@ export async function updateAircraft(id: string, input: UpdateAircraftInput): Pr
 
 // Delete aircraft (only own records)
 export async function deleteAircraft(id: string): Promise<void> {
-  const authStore = useAuthStore();
   const operation = 'delete aircraft';
-  requireAuth(authStore, operation);
+  requireAuth(operation);
 
   await withErrorHandling(async () => {
     const { error } = await supabase
@@ -165,6 +160,6 @@ export async function deleteAircraft(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) throw error;
-  }, { operation, entity: ENTITY_NAME, authStore });
+  }, { operation, entity: ENTITY_NAME });
 }
 

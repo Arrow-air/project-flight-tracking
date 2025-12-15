@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/modules/auth/auth.store';
+import { useAuth } from '@/modules/auth/useAuth';
 
 const ENTITY_NAME = 'flight_legs'
 
@@ -75,9 +75,8 @@ export async function listFlightLegs(options: {
   aircraftId?: string
   order?: 'asc' | 'desc'
 } = {}): Promise<FlightLegData[]> {
-  const authStore = useAuthStore()
   const operation = 'list flight legs'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
 
   const result = await withErrorHandling(async () => {
     let query = supabase
@@ -92,16 +91,15 @@ export async function listFlightLegs(options: {
     const { data, error } = await query
     if (error) throw error
     return (data as FlightLegRow[]).map(mapRowToData)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 // Get single flight leg by id
 export async function getFlightLeg(id: string): Promise<FlightLegData> {
-  const authStore = useAuthStore()
   const operation = 'get flight leg'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const result = await withErrorHandling(async () => {
@@ -113,7 +111,7 @@ export async function getFlightLeg(id: string): Promise<FlightLegData> {
 
     if (error) throw error
     return mapRowToData(data as FlightLegRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -121,9 +119,8 @@ export async function getFlightLeg(id: string): Promise<FlightLegData> {
 
 // Create a flight leg
 export async function createFlightLeg(input: CreateFlightLegInput): Promise<FlightLegData> {
-  const authStore = useAuthStore()
   const operation = 'create flight leg'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!input?.aircraftId) throw new Error('aircraftId is required')
 
   const result = await withErrorHandling(async () => {
@@ -131,7 +128,7 @@ export async function createFlightLeg(input: CreateFlightLegInput): Promise<Flig
       .from(ENTITY_NAME)
       .insert([
         {
-          pilot_id: authStore.userId,
+          pilot_id: useAuth().userId ?? null,
           aircraft_id: input.aircraftId,
           location: input.location ?? null,
           altitude_m: input.altitudeM ?? null,
@@ -145,7 +142,7 @@ export async function createFlightLeg(input: CreateFlightLegInput): Promise<Flig
 
     if (error) throw error
     return mapRowToData(data as FlightLegRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -153,9 +150,8 @@ export async function createFlightLeg(input: CreateFlightLegInput): Promise<Flig
 
 // Update a flight leg (only own records)
 export async function updateFlightLeg(id: string, input: UpdateFlightLegInput): Promise<FlightLegData> {
-  const authStore = useAuthStore()
   const operation = 'update flight leg'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const payload: Partial<FlightLegRow> = {
@@ -177,7 +173,7 @@ export async function updateFlightLeg(id: string, input: UpdateFlightLegInput): 
 
     if (error) throw error
     return mapRowToData(data as FlightLegRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -185,9 +181,8 @@ export async function updateFlightLeg(id: string, input: UpdateFlightLegInput): 
 
 // Delete a flight leg (only own records)
 export async function deleteFlightLeg(id: string): Promise<void> {
-  const authStore = useAuthStore()
   const operation = 'delete flight leg'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
   if (!id) throw new Error('id is required')
 
   await withErrorHandling(async () => {
@@ -197,7 +192,7 @@ export async function deleteFlightLeg(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) throw error
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 }
 
 

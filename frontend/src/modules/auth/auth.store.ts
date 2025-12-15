@@ -1,9 +1,17 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import type { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabaseClient';
 import router from '@/router';
 import * as authApi from './auth.api';
+import type { 
+  User, Session, 
+  SignInWithPasswordCredentials, 
+  SignInWithOAuthCredentials,
+} from './auth.types';
+import {
+  getAuthEmailRedirectURL,
+  getPasswordResetRedirectURL,
+} from './auth.helpers';
 
 export const useAuthStore = defineStore('auth', () => {
   // State
@@ -15,15 +23,15 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const isAuthenticated = computed<boolean>(() => !!user.value && !!session.value);
   const isReady = computed<boolean>(() => initialized.value && (!loading.value || !!user.value));
-  const userEmail = computed<string>(() => user.value?.email || '');
-  const userId = computed<string>(() => user.value?.id || '');
+  const userEmail = computed<string | null>(() => user.value?.email ?? null);
+  const userId = computed<string | null>(() => user.value?.id ?? null);
 
   // Actions
   async function initialize(): Promise<void> {
     try {
       loading.value = true;
 
-      const { session: initialSession } = await authApi.getSession();
+      const initialSession = await authApi.getSession();
       if (initialSession) {
         session.value = initialSession as Session;
         user.value = initialSession.user as User;
@@ -60,14 +68,23 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function login(email: string, password: string): Promise<void> {
+  async function signInWithPassword(credentials: SignInWithPasswordCredentials): Promise<void> {
     try {
       loading.value = true;
-      const { user: authUser, session: authSession } = await authApi.login({email, password});
-      if (authUser && authSession) {
-        user.value = authUser;
-        session.value = authSession as Session;
-      }
+      const authResponseData = await authApi.signInWithPassword(credentials);
+      user.value = authResponseData.user as User;
+      session.value = authResponseData.session as Session;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function signInWithOAuth(credentials: SignInWithOAuthCredentials): Promise<void> {
+    try {
+      loading.value = true;
+      await authApi.signInWithOAuth(credentials);
+      // Note: OAuth redirects the user, so we don't update state here
+      // The auth state change listener will handle the session update after redirect
     } finally {
       loading.value = false;
     }
@@ -76,16 +93,19 @@ export const useAuthStore = defineStore('auth', () => {
   async function register(email: string, password: string, fullName?: string): Promise<void> {
     try {
       loading.value = true;
-      const { user: authUser, session: authSession } = await authApi.register({
+      const authResponseData = await authApi.signUpWithPassword({
         email,
         password,
-        fullName,
+        options: {
+          // Provide the app-specific redirect for Supabase confirmation emails.
+          emailRedirectTo: getAuthEmailRedirectURL(),
+          data: fullName ? { full_name: fullName } : undefined,
+        },
       });
-      // Update state from API response
-      if (authUser && authSession) {
-        user.value = authUser;
-        session.value = authSession;
-      }
+      // Update state from API response when available (e.g., auto-confirm environments)
+      const { user: authUser, session: authSession } = authResponseData;
+      if (authUser) { user.value = authUser; }
+      if (authSession) { session.value = authSession; }
     } finally {
       loading.value = false;
     }
@@ -94,7 +114,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function logout(): Promise<void> {
     try {
       loading.value = true;
-      await authApi.logout();
+      await authApi.signOut();
     } finally {
       user.value = null;
       session.value = null;
@@ -108,7 +128,8 @@ export const useAuthStore = defineStore('auth', () => {
       loading.value = true;
       await authApi.resetPassword({
         email,
-        redirectTo: `${window.location.origin}/reset-password`,
+        // Keep Supabase recovery emails pointed back at the app reset route.
+        redirectTo: getPasswordResetRedirectURL(),
       });
     } finally {
       loading.value = false;
@@ -118,11 +139,11 @@ export const useAuthStore = defineStore('auth', () => {
   async function updatePassword(newPassword: string): Promise<void> {
     try {
       loading.value = true;
-      const { user: authUser } = await authApi.updatePassword({ newPassword });
+      const { user: authUser } = await authApi.updatePassword({
+        password: newPassword,
+      });
       // Update user state if returned
-      if (authUser) {
-        user.value = authUser;
-      }
+      if (authUser) { user.value = authUser; }
     } finally {
       loading.value = false;
     }
@@ -154,7 +175,10 @@ export const useAuthStore = defineStore('auth', () => {
 
     // Actions
     initialize,
-    login,
+    signInWithPassword,
+    // Alias for components expecting login()
+    login: signInWithPassword,
+    signInWithOAuth,
     register,
     logout,
     resetPassword,

@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/modules/auth/auth.store'
+import { useAuth } from '@/modules/auth/useAuth';
 
 const ENTITY_NAME = 'flight_notes'
 
@@ -61,9 +61,8 @@ export async function listFlightNotes(
   flightLegId: string,
   options: { type?: FlightNoteType; order?: 'asc' | 'desc' } = {}
 ): Promise<FlightNoteData[]> {
-  const authStore = useAuthStore()
   const operation = 'list flight notes'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!flightLegId) throw new Error('flightLegId is required')
 
   const result = await withErrorHandling(async () => {
@@ -78,15 +77,14 @@ export async function listFlightNotes(
     const { data, error } = await query
     if (error) throw error
     return (data as FlightNoteRow[]).map(mapRowToData)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 export async function getFlightNote(id: string): Promise<FlightNoteData> {
-  const authStore = useAuthStore()
   const operation = 'get flight note'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const result = await withErrorHandling(async () => {
@@ -98,7 +96,7 @@ export async function getFlightNote(id: string): Promise<FlightNoteData> {
 
     if (error) throw error
     return mapRowToData(data as FlightNoteRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -108,9 +106,8 @@ export async function createFlightNote(
   flightLegId: string,
   input: CreateFlightNoteInput
 ): Promise<FlightNoteData> {
-  const authStore = useAuthStore()
   const operation = 'create flight note'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!flightLegId) throw new Error('flightLegId is required')
   if (!input?.noteType) throw new Error('noteType is required')
 
@@ -119,7 +116,7 @@ export async function createFlightNote(
       .from(ENTITY_NAME)
       .insert([
         {
-          author_id: authStore.userId,
+          author_id: useAuth().userId ?? null,
           flight_leg_id: flightLegId,
           notes: input.notes ?? null,
           note_type: input.noteType,
@@ -130,16 +127,15 @@ export async function createFlightNote(
 
     if (error) throw error
     return mapRowToData(data as FlightNoteRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
 }
 
 export async function updateFlightNote(id: string, input: UpdateFlightNoteInput): Promise<FlightNoteData> {
-  const authStore = useAuthStore()
   const operation = 'update flight note'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const payload: Partial<FlightNoteRow> = {
@@ -157,16 +153,15 @@ export async function updateFlightNote(id: string, input: UpdateFlightNoteInput)
 
     if (error) throw error
     return mapRowToData(data as FlightNoteRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
 }
 
 export async function deleteFlightNote(id: string): Promise<void> {
-  const authStore = useAuthStore()
   const operation = 'delete flight note'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   await withErrorHandling(async () => {
@@ -176,7 +171,7 @@ export async function deleteFlightNote(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) throw error
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 }
 
 

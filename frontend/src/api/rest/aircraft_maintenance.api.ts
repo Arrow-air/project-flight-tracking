@@ -1,8 +1,8 @@
 // Stateless API for aircraft maintenance logs
 
-import { supabase } from '@/lib/supabaseClient'
-import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/modules/auth/auth.store'
+import { supabase } from '@/lib/supabaseClient';
+import { withErrorHandling, requireAuth } from '@/api/errorHandler';
+import { useAuth } from '@/modules/auth/useAuth';
 
 const ENTITY_NAME = 'aircraft_maintenance_log'
 
@@ -75,9 +75,8 @@ export async function listMaintenanceLogs(
   aircraftId: string,
   options: { type?: MaintenanceLogType; order?: 'asc' | 'desc' } = {}
 ): Promise<MaintenanceLogData[]> {
-  const authStore = useAuthStore()
   const operation = 'list maintenance logs'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!aircraftId) throw new Error('aircraftId is required')
 
   const result = await withErrorHandling(async () => {
@@ -94,16 +93,15 @@ export async function listMaintenanceLogs(
     const { data, error } = await query
     if (error) throw error
     return (data as MaintenanceLogRow[]).map(mapRowToData)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   return result ?? []
 }
 
 // Get a single log by id
 export async function getMaintenanceLog(id: string): Promise<MaintenanceLogData> {
-  const authStore = useAuthStore()
   const operation = 'get maintenance log'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const result = await withErrorHandling(async () => {
@@ -115,7 +113,7 @@ export async function getMaintenanceLog(id: string): Promise<MaintenanceLogData>
 
     if (error) throw error
     return mapRowToData(data as MaintenanceLogRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -126,9 +124,8 @@ export async function createMaintenanceLog(
   aircraftId: string,
   input: CreateMaintenanceLogInput
 ): Promise<MaintenanceLogData> {
-  const authStore = useAuthStore()
   const operation = 'create maintenance log'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!aircraftId) throw new Error('aircraftId is required')
   if (!input?.logType) throw new Error('logType is required')
 
@@ -138,7 +135,7 @@ export async function createMaintenanceLog(
       .insert([
         {
           aircraft_id: aircraftId,
-          author_id: authStore.userId,
+          author_id: useAuth().userId ?? null,
           log_type: input.logType,
           log_date: input.logDate ?? null,
           title: input.title ?? null,
@@ -150,7 +147,7 @@ export async function createMaintenanceLog(
 
     if (error) throw error
     return mapRowToData(data as MaintenanceLogRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -161,9 +158,8 @@ export async function updateMaintenanceLog(
   id: string,
   input: UpdateMaintenanceLogInput
 ): Promise<MaintenanceLogData> {
-  const authStore = useAuthStore()
   const operation = 'update maintenance log'
-  requireAuth(authStore, operation)
+  requireAuth(operation)
   if (!id) throw new Error('id is required')
 
   const payload: Partial<MaintenanceLogRow> = {
@@ -183,7 +179,7 @@ export async function updateMaintenanceLog(
 
     if (error) throw error
     return mapRowToData(data as MaintenanceLogRow)
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 
   if (!result) throw new Error('Operation cancelled')
   return result
@@ -191,9 +187,8 @@ export async function updateMaintenanceLog(
 
 // Delete a maintenance log (author can delete own logs)
 export async function deleteMaintenanceLog(id: string): Promise<void> {
-  const authStore = useAuthStore()
   const operation = 'delete maintenance log'
-  requireAuth(authStore, operation)
+  requireAuth(operation);
   if (!id) throw new Error('id is required')
 
   await withErrorHandling(async () => {
@@ -203,7 +198,7 @@ export async function deleteMaintenanceLog(id: string): Promise<void> {
       .eq('id', id)
 
     if (error) throw error
-  }, { operation, entity: ENTITY_NAME, authStore })
+  }, { operation, entity: ENTITY_NAME })
 }
 
 
