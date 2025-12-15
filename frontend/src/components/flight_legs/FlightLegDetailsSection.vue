@@ -25,7 +25,7 @@
                         <div>
                             <RouterLink v-if="aircraft" class="btn btn-outline btn-sm"
                                 :to="{ name: 'Aircraft', params: { id: aircraft.id } }">
-                                {{ aircraft.serialNumber }}
+                                {{ aircraft.serial_number }}
                             </RouterLink>
                             <span v-else>{{ leg.aircraftId }}</span>
                         </div>
@@ -48,6 +48,7 @@
                     <p class="whitespace-pre-wrap">{{ leg.description || '—' }}</p>
                 </div>
                 <div class="text-sm text-base-content/60 flex flex-wrap gap-2">
+                    
                     <span v-if="leg.pilotName">Pilot: {{ leg.pilotName }}</span>
                     <span>Created: {{ formatDate(leg.createdAt) }}</span>
                     <span class="mx-2">·</span>
@@ -117,7 +118,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import type { FlightLegData, UpdateFlightLegInput } from '@/api/rest/flight_legs.api'
 import { getFlightLeg, updateFlightLeg, deleteFlightLeg } from '@/api/rest/flight_legs.api'
-import { getAircraft, type AircraftData } from '@/api/rest/aircraft.api'
+import { getAircraft, type AircraftRow } from '@/api/rest/aircraft.api'
 
 const props = defineProps<{ flightId: string }>()
 const emit = defineEmits<{ (e: 'loaded', value: FlightLegData): void; (e: 'updated', value: FlightLegData): void; (e: 'deleted', id: string): void }>()
@@ -133,7 +134,7 @@ const form = reactive<UpdateFlightLegInput>({})
 const deleteDialogRef = ref<HTMLDialogElement | null>(null)
 
 // Related aircraft display
-const aircraft = ref<AircraftData | null>(null)
+const aircraft = ref<AircraftRow | null>(null)
 const aircraftError = ref('')
 
 function formatDate(iso: string): string {

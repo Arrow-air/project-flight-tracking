@@ -1,4 +1,3 @@
-import { useAuthStore } from '@/features/auth/auth.store';
 import { supabase } from '@/lib/supabaseClient';
 import { withErrorHandling, requireAuth } from '@/api/errorHandler';
 
@@ -77,8 +76,7 @@ export async function getLogParamsDiff(
 ): Promise<LogParamDiffResponse | null> {
 	const operation = 'get log params diff';
 
-    const authStore = useAuthStore(); // TODO: shortly to replace with improved version
-    requireAuth(authStore, operation);
+    requireAuth(operation);
 
     let logDiffQuery: string = '';
     if (options) {

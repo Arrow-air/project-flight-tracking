@@ -11,7 +11,7 @@
                         required>
                         <option disabled value="">Select aircraft by serial number</option>
                         <option v-for="ac in aircrafts" :key="ac.id" :value="ac.id">
-                            {{ ac.serialNumber }}
+                            {{ ac.serial_number }}
                             <span v-if="ac.name"> · {{ ac.name }}</span>
                         </option>
                     </select>
@@ -71,7 +71,7 @@
 import { onMounted, ref } from 'vue'
 import type { FlightLegData } from '@/api/rest/flight_legs.api'
 import { createFlightLeg } from '@/api/rest/flight_legs.api'
-import { listAircraft, type AircraftData } from '@/api/rest/aircraft.api'
+import { listAircraft, type AircraftRow } from '@/api/rest/aircraft.api'
 
 const emit = defineEmits<{ (e: 'created', value: FlightLegData): void }>()
 
@@ -83,7 +83,7 @@ const form = ref<{ aircraftId: string; title?: string; location?: string; altitu
 )
 
 // Aircraft selection state
-const aircrafts = ref<AircraftData[]>([])
+const aircrafts = ref<AircraftRow[]>([])
 const aircraftLoading = ref(false)
 const aircraftError = ref('')
 

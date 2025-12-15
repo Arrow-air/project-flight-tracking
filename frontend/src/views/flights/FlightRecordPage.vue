@@ -48,7 +48,7 @@ import FlightLegDetailsSection from '@/components/flight_legs/FlightLegDetailsSe
 import FlightNotesSection from '@/components/flight_notes/FlightNotesSection.vue'
 import FlightLogUpload from '@/components/flight_logs/FlightLogUpload.vue'
 import FlightLogsList from '@/components/flight_logs/FlightLogsList.vue'
-import LogParamsDiffTable from '@/features/logAnalysis/components/LogParamsDiffTable.vue'
+import LogParamsDiffTable from '@/modules/logAnalysis/components/LogParamsDiffTable.vue'
 
 const route = useRoute()
 const router = useRouter()
