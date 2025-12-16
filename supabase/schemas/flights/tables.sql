@@ -27,7 +27,7 @@ CREATE TABLE public.flight_notes (
 
   -- Relationships
   author_id uuid REFERENCES public.user_profiles(id) ON DELETE SET NULL,
-  flight_leg_id uuid REFERENCES public.flight_legs(id) ON DELETE CASCADE,
+  flight_leg_id uuid NOT NULL REFERENCES public.flight_legs(id) ON DELETE CASCADE,
 
   -- Data
   notes text,
@@ -70,5 +70,4 @@ CREATE TABLE public.flight_leg_tags (
   -- Data
   CONSTRAINT flight_leg_tags_unique UNIQUE (tag_id, leg_id)
 );
-
 
