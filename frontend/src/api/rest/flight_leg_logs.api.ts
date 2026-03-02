@@ -20,6 +20,7 @@ export interface FlightLogRow {
 	object_path: string
 	content_type: string | null
 	checksum_sha256: string | null
+	summary?: Record<string, any> | null
 	user_profiles?: { full_name: string } | null
 }
 
@@ -37,6 +38,7 @@ export interface FlightLogData {
 	objectPath: string
 	contentType: string | null
 	checksumSha256: string | null
+	summary?: Record<string, any> | null
 }
 
 function mapRowToData(row: FlightLogRow): FlightLogData {
