@@ -54,6 +54,7 @@ function mapRowToData(row: FlightLogRow): FlightLogData {
 		objectPath: row.object_path,
 		contentType: row.content_type,
 		checksumSha256: row.checksum_sha256,
+		summary: row.summary ?? null,
 	}
 }
 
