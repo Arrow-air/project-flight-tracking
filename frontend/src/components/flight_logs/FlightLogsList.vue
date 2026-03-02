@@ -20,7 +20,7 @@
 
 			<div class="grid gap-3">
 				<template v-for="log in logs" :key="log.id">
-					<FlightLogRecord :log="log" @deleted="handleDeleted" />
+					<FlightLogRecord :log="log" @deleted="handleDeleted" @summary-updated="handleSummaryUpdated" />
 				</template>
 			</div>
 		</div>
@@ -54,6 +54,11 @@ async function reload() {
 function handleDeleted(id: string) {
 	logs.value = logs.value.filter((l) => l.id !== id);
 	reload();
+}
+
+function handleSummaryUpdated(id: string, summary: Record<string, any>) {
+	const log = logs.value.find((l) => l.id === id);
+	if (log) log.summary = summary;
 }
 
 watch(() => [props.flightLegId, order.value, props.refreshKey], reload);

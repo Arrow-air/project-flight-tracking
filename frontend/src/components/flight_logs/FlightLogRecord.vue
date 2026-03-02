@@ -14,6 +14,14 @@
 					</div>
 				</div>
 				<div class="card-actions">
+					<button
+						v-if="isBinLog"
+						class="btn btn-outline btn-sm"
+						@click="generateSummary"
+						:disabled="analyzing">
+						<span v-if="analyzing" class="loading loading-spinner loading-xs"></span>
+						<span v-else>{{ summary ? 'Regenerate' : 'Generate Summary' }}</span>
+					</button>
 					<a class="btn btn-ghost btn-sm" :href="signedUrl" target="_blank" rel="noopener" @click.prevent="openSigned">Open</a>
 					<button class="btn btn-error btn-sm" @click="confirmDelete" :disabled="deleting">
 						<span v-if="deleting" class="loading loading-spinner loading-xs"></span>
@@ -24,7 +32,6 @@
 
 			<!-- Flight Summary -->
 			<div v-if="summary" class="border border-base-300 rounded-lg p-3 text-sm space-y-2">
-				<!-- Score + header -->
 				<div class="flex items-center justify-between">
 					<span class="font-semibold text-base-content/80">Flight Summary</span>
 					<span class="badge text-white font-bold"
@@ -37,7 +44,6 @@
 					</span>
 				</div>
 
-				<!-- Key stats -->
 				<div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-base-content/70">
 					<span>Duration: <strong class="text-base-content">{{ summary.summary?.duration ?? '—' }}</strong></span>
 					<span>Max current: <strong class="text-base-content">{{ summary.summary?.max_current_a ?? '—' }} A</strong></span>
@@ -45,7 +51,6 @@
 					<span>Modes: <strong class="text-base-content">{{ (summary.summary?.modes_used ?? []).join(', ') || '—' }}</strong></span>
 				</div>
 
-				<!-- Check badges -->
 				<div class="flex flex-wrap gap-1">
 					<template v-for="(check, key) in summary.checks" :key="key">
 						<span class="badge badge-sm"
@@ -54,12 +59,11 @@
 								'badge-warning': check.status === 'warn',
 								'badge-error':   check.status === 'fail',
 							}">
-							{{ formatCheckKey(key) }}
+							{{ formatCheckKey(String(key)) }}
 						</span>
 					</template>
 				</div>
 
-				<!-- Anomalies -->
 				<div v-if="summary.anomalies?.length" class="text-xs text-error space-y-0.5">
 					<div class="font-semibold text-base-content/70">Anomalies</div>
 					<div v-for="(a, i) in summary.anomalies" :key="i">
@@ -70,9 +74,9 @@
 				<div class="text-xs text-base-content/40">Generated {{ formatDate(summary.generated_at) }}</div>
 			</div>
 
-			<!-- No summary yet -->
-			<div v-else class="text-xs text-base-content/40 italic">
-				No summary yet — run <code>flight_summary.py</code> against this log and upload the result.
+			<!-- No summary yet (only for .bin files) -->
+			<div v-else-if="isBinLog" class="text-xs text-base-content/40 italic">
+				No summary yet — click "Generate Summary" above.
 			</div>
 
 			<div v-if="error" class="text-error text-xs">{{ error }}</div>
@@ -83,15 +87,25 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { getSignedUrl, deleteFlightLog, type FlightLogData } from '@/api/rest/flight_leg_logs.api';
+import { supabase } from '@/lib/supabaseClient';
 
 const props = defineProps<{ log: FlightLogData }>();
-const emit = defineEmits<{ (e: 'deleted', id: string): void }>();
+const emit = defineEmits<{
+	(e: 'deleted', id: string): void;
+	(e: 'summary-updated', id: string, summary: Record<string, any>): void;
+}>();
 
 const signedUrl = ref('');
 const deleting = ref(false);
+const analyzing = ref(false);
 const error = ref('');
 
-// Parse summary from log.summary (JSONB comes through as object or null)
+const isBinLog = computed(() =>
+	props.log.filename?.endsWith('.bin') ||
+	props.log.contentType === 'application/octet-stream' ||
+	props.log.contentType === 'application/macbinary'
+);
+
 const summary = computed(() => {
 	if (!props.log.summary) return null;
 	if (typeof props.log.summary === 'string') {
@@ -118,6 +132,46 @@ function formatCheckKey(key: string): string {
 async function openSigned() {
 	signedUrl.value = await getSignedUrl(props.log.objectPath, 300, props.log.bucket);
 	window.open(signedUrl.value, '_blank');
+}
+
+async function generateSummary() {
+	const analysisUrl = import.meta.env.VITE_FLIGHT_ANALYSIS_URL;
+	if (!analysisUrl) {
+		error.value = 'VITE_FLIGHT_ANALYSIS_URL not set in .env.local — is the analysis server running?';
+		return;
+	}
+
+	try {
+		analyzing.value = true;
+		error.value = '';
+
+		// Get a short-lived signed URL for the .bin file
+		const url = await getSignedUrl(props.log.objectPath, 120, props.log.bucket);
+
+		const resp = await fetch(`${analysisUrl}/analyze`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				log_id: props.log.id,
+				signed_url: url,
+				supabase_url: import.meta.env.VITE_SUPABASE_URL,
+				supabase_service_key: import.meta.env.VITE_SUPABASE_SERVICE_KEY,
+			}),
+		});
+
+		if (!resp.ok) {
+			const msg = await resp.text();
+			throw new Error(`Analysis failed: ${msg}`);
+		}
+
+		const result = await resp.json();
+		emit('summary-updated', props.log.id, result.summary);
+
+	} catch (e: any) {
+		error.value = e?.message || 'Failed to generate summary';
+	} finally {
+		analyzing.value = false;
+	}
 }
 
 async function confirmDelete() {
