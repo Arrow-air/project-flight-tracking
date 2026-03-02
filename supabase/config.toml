@@ -139,6 +139,7 @@ allowed_mime_types = [
   "application/x-bin",          # Binary logs
   "application/x-log",          # .log files
   "application/x-mavlink-log",  # MAVLink logs
+  "application/macbinary",          # .bin on macOS (Mac browser detection)
   "application/x-apj",          # .apj parameter files
   "application/x-binary"        # Generic binary
 ]
