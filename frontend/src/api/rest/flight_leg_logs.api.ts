@@ -145,7 +145,7 @@ export async function uploadFlightLog(
     // const objectPath = `${flightLegId}/${yyyy}/${mm}/${dd}/${crypto.randomUUID()}_${safe}`;
     const objectPath = `${flightLegId}/${crypto.randomUUID()}_${safe}`;
 
-	const contentType = file.type || 'application/octet-stream';
+	const contentType = file.name.endsWith('.bin') ? 'application/octet-stream' : (file.type || 'application/octet-stream');
 	const sizeBytes = file.size;
 	let checksumSha256: string | null = null;
 
