@@ -28,6 +28,10 @@ CREATE POLICY "Users can update own flight leg tags" ON public.flight_leg_tags
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = tagged_by_id)
 WITH CHECK ((SELECT auth.uid()) = tagged_by_id);
 
+CREATE POLICY "Users can delete own flight leg tags" ON public.flight_leg_tags
+  FOR DELETE 
+  TO authenticated 
+  USING ((SELECT auth.uid()) = tagged_by_id);
 
 CREATE TRIGGER set_updated_at_flight_leg_tags
   BEFORE UPDATE ON public.flight_leg_tags

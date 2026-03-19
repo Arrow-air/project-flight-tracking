@@ -1,7 +1,7 @@
 <template>
-  <div class="wrapper d-flex flex-column min-vh-100 bg-light">
-    <router-view />
-  </div>
+    <div class="wrapper d-flex flex-column min-vh-100 bg-light">
+        <router-view />
+    </div>
 </template>
 
 
@@ -10,6 +10,4 @@
 </script>
 
 
-<style scoped>
-
-</style>
+<style scoped></style>

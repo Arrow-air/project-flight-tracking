@@ -85,7 +85,8 @@ WITH CHECK ((SELECT auth.uid()) = id);
 
 CREATE POLICY user_profiles_insert_own
   ON public.user_profiles
-  FOR INSERT TO authenticated
+  FOR INSERT 
+  TO authenticated
   WITH CHECK ((SELECT auth.uid()) = id);
 
 -- =========================================================================

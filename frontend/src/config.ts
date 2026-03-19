@@ -6,7 +6,7 @@ export const graphqlApiBaseURL = restApiBaseURL ? `${restApiBaseURL}/graphql` : 
 export function logViteEnvironment() {
     console.log(`Using REST API URL: ${restApiBaseURL}`);
     // console.log(`Using GraphQL API URL: ${graphqlApiBaseURL}`);
-    
+
     console.log("🔧 Vite Build Environment:");
     console.log("🌍 VITE_API_URL:", restApiBaseURL);
     console.log("🛠 Mode:", import.meta.env.MODE);

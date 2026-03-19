@@ -16,4 +16,4 @@ export const functionCORS = {
       exposeHeaders: ['Content-Length', 'X-JSON', 'X-Total-Count'],
       maxAge: 600,
       credentials: true,
-}
+};

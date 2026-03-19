@@ -33,6 +33,11 @@ CREATE POLICY "Users can update own flight runs" ON public.flight_legs
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = pilot_id)
 WITH CHECK ((SELECT auth.uid()) = pilot_id);
 
+CREATE POLICY "Users can delete own flight runs" ON public.flight_legs
+  FOR DELETE 
+  TO authenticated 
+  USING ((SELECT auth.uid()) = pilot_id);
+
 CREATE TRIGGER set_updated_at_flight_run
   BEFORE UPDATE ON public.flight_legs
   FOR EACH ROW
