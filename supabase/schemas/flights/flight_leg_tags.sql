@@ -17,14 +17,14 @@ CREATE TABLE public.flight_leg_tags (
 ALTER TABLE public.flight_leg_tags ENABLE ROW LEVEL SECURITY;
 
 -- Policies for flight_leg_tags
-CREATE POLICY "Users can view own flight leg tags" ON public.flight_leg_tags 
+CREATE POLICY "Users can view own flight leg tags" ON public.flight_leg_tags
 FOR SELECT TO authenticated USING ((SELECT auth.uid()) = tagged_by_id);
 
-CREATE POLICY "Users can create flight leg tags" ON public.flight_leg_tags 
-FOR INSERT TO authenticated 
+CREATE POLICY "Users can create flight leg tags" ON public.flight_leg_tags
+FOR INSERT TO authenticated
 WITH CHECK ((SELECT auth.uid()) = tagged_by_id);
 
-CREATE POLICY "Users can update own flight leg tags" ON public.flight_leg_tags 
+CREATE POLICY "Users can update own flight leg tags" ON public.flight_leg_tags
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = tagged_by_id)
 WITH CHECK ((SELECT auth.uid()) = tagged_by_id);
 
@@ -36,7 +36,7 @@ CREATE TRIGGER set_updated_at_flight_leg_tags
 
 
 CREATE VIEW public.flight_leg_tags_with_tags AS
-SELECT 
+SELECT
   flight_leg_tags.*,
   tags.name AS tag_name,
   tags.description AS tag_description

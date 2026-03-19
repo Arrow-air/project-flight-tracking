@@ -1,0 +1,8 @@
+
+# [ DOTENVX SPECIFIC]
+# =================================
+
+# Never expose private encryption keys
+config/env/.env.keys
+**/.env.keys
+.env.keys

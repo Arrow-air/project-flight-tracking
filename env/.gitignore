@@ -1,0 +1,17 @@
+
+# [ DOTENVX SPECIFIC]
+# =================================
+
+#    -> Base environment variables
+**/.env
+*/.env
+**/!.env.example 
+
+#    -> Never commit keys, but encrypted envs are fine
+.env.keys
+.env.local
+.env.*.local
+
+#    -> Assuming these have been encrypted with dotenvx
+!.env.production
+!.env.staging

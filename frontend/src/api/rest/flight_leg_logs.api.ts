@@ -2,111 +2,111 @@
 
 import { supabase } from '@/lib/supabaseClient'
 import { withErrorHandling, requireAuth } from '@/api/errorHandler'
-import { useAuthStore } from '@/stores/auth.store'
+import { useAuthStore } from '@/features/auth/auth.store';
 
 const ENTITY_NAME = 'flight_leg_logs';
 const DEFAULT_BUCKET = 'flight_logs';
 
 export interface FlightLogRow {
-	id: string
-	created_at: string
-	updated_at: string
-	flight_leg_id: string
-	uploaded_by_id: string
-	filename: string
-	notes: string | null
-	size_bytes: number | null
-	bucket: string
-	object_path: string
-	content_type: string | null
-	checksum_sha256: string | null
-	user_profiles?: { full_name: string } | null
+  id: string
+  created_at: string
+  updated_at: string
+  flight_leg_id: string
+  uploaded_by_id: string
+  filename: string
+  notes: string | null
+  size_bytes: number | null
+  bucket: string
+  object_path: string
+  content_type: string | null
+  checksum_sha256: string | null
+  user_profiles?: { full_name: string } | null
 }
 
 export interface FlightLogData {
-	id: string
-	createdAt: string
-	updatedAt: string
-	flightLegId: string
-	uploadedById: string
-	uploadedByName?: string | null
-	filename: string
-	notes: string | null
-	sizeBytes: number | null
-	bucket: string
-	objectPath: string
-	contentType: string | null
-	checksumSha256: string | null
+  id: string
+  createdAt: string
+  updatedAt: string
+  flightLegId: string
+  uploadedById: string
+  uploadedByName?: string | null
+  filename: string
+  notes: string | null
+  sizeBytes: number | null
+  bucket: string
+  objectPath: string
+  contentType: string | null
+  checksumSha256: string | null
 }
 
 function mapRowToData(row: FlightLogRow): FlightLogData {
-	return {
-		id: row.id,
-		createdAt: row.created_at,
-		updatedAt: row.updated_at,
-		flightLegId: row.flight_leg_id,
-		uploadedById: row.uploaded_by_id,
-		uploadedByName: row.user_profiles?.full_name ?? null,
-		filename: row.filename,
-		notes: row.notes,
-		sizeBytes: row.size_bytes,
-		bucket: row.bucket,
-		objectPath: row.object_path,
-		contentType: row.content_type,
-		checksumSha256: row.checksum_sha256,
-	}
+  return {
+    id: row.id,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    flightLegId: row.flight_leg_id,
+    uploadedById: row.uploaded_by_id,
+    uploadedByName: row.user_profiles?.full_name ?? null,
+    filename: row.filename,
+    notes: row.notes,
+    sizeBytes: row.size_bytes,
+    bucket: row.bucket,
+    objectPath: row.object_path,
+    contentType: row.content_type,
+    checksumSha256: row.checksum_sha256,
+  }
 }
 
 export async function listFlightLogs(
-	flightLegId: string,
-	options: { order?: 'asc' | 'desc' } = {}
+  flightLegId: string,
+  options: { order?: 'asc' | 'desc' } = {}
 ): Promise<FlightLogData[]> {
-	const authStore = useAuthStore()
-	const operation = 'list flight logs'
-	requireAuth(authStore, operation)
-	if (!flightLegId) throw new Error('flightLegId is required')
+  const authStore = useAuthStore()
+  const operation = 'list flight logs'
+  requireAuth(authStore, operation)
+  if (!flightLegId) throw new Error('flightLegId is required')
 
-	const result = await withErrorHandling(async () => {
-		const { data, error } = await supabase
-			.from(ENTITY_NAME)
-			.select('*, user_profiles(full_name)')
-			.eq('flight_leg_id', flightLegId)
-			.order('created_at', { ascending: options.order === 'asc' ? true : false })
+  const result = await withErrorHandling(async () => {
+    const { data, error } = await supabase
+      .from(ENTITY_NAME)
+      .select('*, user_profiles(full_name)')
+      .eq('flight_leg_id', flightLegId)
+      .order('created_at', { ascending: options.order === 'asc' ? true : false })
 
-		if (error) throw error
-		return (data as FlightLogRow[]).map(mapRowToData)
-	}, { operation, entity: ENTITY_NAME, authStore })
+    if (error) throw error
+    return (data as FlightLogRow[]).map(mapRowToData)
+  }, { operation, entity: ENTITY_NAME, authStore })
 
-	return result ?? []
+  return result ?? []
 }
 
 export async function getFlightLog(id: string): Promise<FlightLogData> {
-	const authStore = useAuthStore()
-	const operation = 'get flight log'
-	requireAuth(authStore, operation)
-	if (!id) throw new Error('id is required')
+  const authStore = useAuthStore()
+  const operation = 'get flight log'
+  requireAuth(authStore, operation)
+  if (!id) throw new Error('id is required')
 
-	const result = await withErrorHandling(async () => {
-		const { data, error } = await supabase
-			.from(ENTITY_NAME)
-			.select('*, user_profiles(full_name)')
-			.eq('id', id)
-			.single()
+  const result = await withErrorHandling(async () => {
+    const { data, error } = await supabase
+      .from(ENTITY_NAME)
+      .select('*, user_profiles(full_name)')
+      .eq('id', id)
+      .single()
 
-		if (error) throw error
-		return mapRowToData(data as FlightLogRow)
-	}, { operation, entity: ENTITY_NAME, authStore })
+    if (error) throw error
+    return mapRowToData(data as FlightLogRow)
+  }, { operation, entity: ENTITY_NAME, authStore })
 
-	if (!result) throw new Error('Operation cancelled')
-	return result
+  if (!result) throw new Error('Operation cancelled')
+  return result
 }
 
 async function computeSha256Hex(file: File): Promise<string> {
-	const buffer = await file.arrayBuffer()
-	// @ts-ignore - subtle exists in modern browsers
-	const digest = await crypto.subtle.digest('SHA-256', buffer)
-	const bytes = new Uint8Array(digest as ArrayBuffer)
-	return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
+  const buffer = await file.arrayBuffer()
+  // @ts-ignore - subtle exists in modern browsers
+  const digest = await crypto.subtle.digest('SHA-256', buffer)
+  const bytes = new Uint8Array(digest as ArrayBuffer)
+  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('')
 }
 
 function safeFilename(name: string) {
@@ -123,18 +123,18 @@ function safeFilename(name: string) {
 }
 
 export async function uploadFlightLog(
-	flightLegId: string,
-	file: File,
-	options: { bucket?: string, notes?: string} = {}
+  flightLegId: string,
+  file: File,
+  options: { bucket?: string, notes?: string} = {}
 ): Promise<FlightLogData> {
-	const authStore = useAuthStore()
-	const operation = 'upload flight log'
-	requireAuth(authStore, operation);
-	if (!flightLegId) throw new Error('flightLegId is required');
-	if (!file) throw new Error('file is required');
+  const authStore = useAuthStore()
+  const operation = 'upload flight log'
+  requireAuth(authStore, operation);
+  if (!flightLegId) throw new Error('flightLegId is required');
+  if (!file) throw new Error('file is required');
 
-	const bucket = options.bucket || DEFAULT_BUCKET
-	const notes = options.notes || '';
+  const bucket = options.bucket || DEFAULT_BUCKET
+  const notes = options.notes || '';
     const safe = safeFilename(file.name);           // e.g. "2025-08-13-flight1.bin"
 
     // const date = new Date();
@@ -144,84 +144,84 @@ export async function uploadFlightLog(
     // const objectPath = `${flightLegId}/${yyyy}/${mm}/${dd}/${crypto.randomUUID()}_${safe}`;
     const objectPath = `${flightLegId}/${crypto.randomUUID()}_${safe}`;
 
-	const contentType = file.type || 'application/octet-stream';
-	const sizeBytes = file.size;
-	let checksumSha256: string | null = null;
+  const contentType = file.type || 'application/octet-stream';
+  const sizeBytes = file.size;
+  let checksumSha256: string | null = null;
 
-	const result = await withErrorHandling(async () => {
-		try { checksumSha256 = await computeSha256Hex(file); } 
-		catch (_e) { checksumSha256 = null; }
+  const result = await withErrorHandling(async () => {
+    try { checksumSha256 = await computeSha256Hex(file); }
+    catch (_e) { checksumSha256 = null; }
 
-		const { error: uploadError } = await supabase
-			.storage
-			.from(bucket)
-			.upload(objectPath, file, { contentType, upsert: false })
+    const { error: uploadError } = await supabase
+      .storage
+      .from(bucket)
+      .upload(objectPath, file, { contentType, upsert: false })
 
-		if (uploadError) throw uploadError
+    if (uploadError) throw uploadError
 
-		const { data, error } = await supabase
-			.from(ENTITY_NAME)
-			.insert([
-				{
-					flight_leg_id: flightLegId,
-					uploaded_by_id: authStore.userId,
-					filename: safe,
-					notes,
-					size_bytes: sizeBytes,
-					bucket,
-					object_path: objectPath,
-					content_type: contentType,
-					checksum_sha256: checksumSha256,
-				},
-			])
-			.select('*, user_profiles(full_name)')
-			.single()
+    const { data, error } = await supabase
+      .from(ENTITY_NAME)
+      .insert([
+        {
+          flight_leg_id: flightLegId,
+          uploaded_by_id: authStore.userId,
+          filename: safe,
+          notes,
+          size_bytes: sizeBytes,
+          bucket,
+          object_path: objectPath,
+          content_type: contentType,
+          checksum_sha256: checksumSha256,
+        },
+      ])
+      .select('*, user_profiles(full_name)')
+      .single()
 
-		if (error) throw error
-		return mapRowToData(data as FlightLogRow)
-	}, { operation, entity: ENTITY_NAME, authStore })
+    if (error) throw error
+    return mapRowToData(data as FlightLogRow)
+  }, { operation, entity: ENTITY_NAME, authStore })
 
-	if (!result) throw new Error('Operation cancelled')
-	return result
+  if (!result) throw new Error('Operation cancelled')
+  return result
 }
 
 export async function deleteFlightLog(id: string): Promise<void> {
-	const authStore = useAuthStore();
-	const operation = 'delete flight log';
-	requireAuth(authStore, operation);
-	if (!id) throw new Error('id is required');
+  const authStore = useAuthStore();
+  const operation = 'delete flight log';
+  requireAuth(authStore, operation);
+  if (!id) throw new Error('id is required');
 
-	await withErrorHandling(async () => {
-		// Get object path first
-		const { data: row, error: selErr } = await supabase
-			.from(ENTITY_NAME)
-			.select('*')
-			.eq('id', id)
-			.single()
-		if (selErr) throw selErr;
+  await withErrorHandling(async () => {
+    // Get object path first
+    const { data: row, error: selErr } = await supabase
+      .from(ENTITY_NAME)
+      .select('*')
+      .eq('id', id)
+      .single()
+    if (selErr) throw selErr;
 
-		const bucket = (row as FlightLogRow).bucket || DEFAULT_BUCKET;
-		const objectPath = (row as FlightLogRow).object_path;
+    const bucket = (row as FlightLogRow).bucket || DEFAULT_BUCKET;
+    const objectPath = (row as FlightLogRow).object_path;
 
-		const { error: delStorageErr } = await supabase.storage.from(bucket).remove([objectPath]);
-		if (delStorageErr) throw delStorageErr;
+    const { error: delStorageErr } = await supabase.storage.from(bucket).remove([objectPath]);
+    if (delStorageErr) throw delStorageErr;
 
-		const { error } = await supabase
-			.from(ENTITY_NAME)
-			.delete()
-			.eq('id', id)
-		if (error) throw error;
-	}, { operation, entity: ENTITY_NAME, authStore })
+    const { error } = await supabase
+      .from(ENTITY_NAME)
+      .delete()
+      .eq('id', id)
+    if (error) throw error;
+  }, { operation, entity: ENTITY_NAME, authStore })
 }
 
 export async function getSignedUrl(objectPath: string, expiresInSeconds = 3600, bucket = DEFAULT_BUCKET): Promise<string> {
-	const operation = 'get signed url';
-	const result = await withErrorHandling(async () => {
-		const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, expiresInSeconds);
-		if (error) throw error;
-		return data?.signedUrl || ''
-	}, { operation, entity: ENTITY_NAME })
-	return result || ''
+  const operation = 'get signed url';
+  const result = await withErrorHandling(async () => {
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, expiresInSeconds);
+    if (error) throw error;
+    return data?.signedUrl || ''
+  }, { operation, entity: ENTITY_NAME })
+  return result || ''
 }
 
 

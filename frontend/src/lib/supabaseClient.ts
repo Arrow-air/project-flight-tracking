@@ -1,6 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
+const supabasePublishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+let supabase: SupabaseClient;
+try {
+  supabase = createClient(supabaseUrl, supabasePublishableKey);
+} catch (error) {
+  console.error('Error creating Supabase client:', error);
+  console.error('Supabase URL:', supabaseUrl);
+  console.error('Supabase Publishable Key:', supabasePublishableKey);
+  throw error;
+}
+
+export { supabase };

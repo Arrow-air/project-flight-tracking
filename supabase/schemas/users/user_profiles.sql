@@ -6,7 +6,7 @@
 -- =========================================================================
 DO $$ BEGIN
   CREATE TYPE public.user_role AS ENUM (
-    'user', 
+    'user',
     'admin'
   );
 EXCEPTION WHEN duplicate_object THEN NULL;
@@ -71,15 +71,15 @@ CREATE TRIGGER on_auth_user_created
 -- =========================================================================
 
 -- Policy: Allow all authenticated users to view user profiles
-CREATE POLICY user_profiles_select 
+CREATE POLICY user_profiles_select
   ON public.user_profiles
   FOR SELECT TO authenticated
   USING (true);
 
-CREATE POLICY "Users can view own profile" ON public.user_profiles 
+CREATE POLICY "Users can view own profile" ON public.user_profiles
 FOR SELECT TO authenticated USING ((SELECT auth.uid()) = id);
 
-CREATE POLICY "Users can update own profile" ON public.user_profiles 
+CREATE POLICY "Users can update own profile" ON public.user_profiles
 FOR UPDATE TO authenticated USING ((SELECT auth.uid()) = id)
 WITH CHECK ((SELECT auth.uid()) = id);
 
