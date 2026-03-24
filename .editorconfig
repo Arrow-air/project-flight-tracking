@@ -22,16 +22,7 @@ indent_size = 4
 indent_style = tab
 indent_size = 4
 [{*.ts,*.tsx,*.html,*.yml,*.yaml,*.toml,*.json,*.tf,*.hcl}]
-indent_style = space
 indent_size = 2
 # we might want to use https://www.npmjs.com/package/lintspaces instead, we can't lint the css and js comments atm
 [{*.js,*.css,Cargo.lock}]
-indent_size = unset
-[frontend/**]
-trim_trailing_whitespace = false
-indent_style = unset
-indent_size = unset
-[supabase/**]
-trim_trailing_whitespace = false
-indent_style = unset
 indent_size = unset
