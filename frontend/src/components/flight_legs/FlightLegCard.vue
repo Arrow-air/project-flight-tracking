@@ -8,6 +8,7 @@
                     <div class="flex items-center gap-2">
                         <h3 class="card-title text-base">{{ leg.title || 'Flight leg' }}</h3>
                         <span v-if="leg.location" class="badge badge-outline">{{ leg.location }}</span>
+                        <span v-if="leg.flightDurationSec != null" class="badge badge-primary badge-outline">{{ formatDuration(leg.flightDurationSec) }}</span>
                     </div>
                     <div class="text-xs text-base-content/70">
                         <span>Created: {{ formatDate(leg.createdAt) }}</span>
@@ -35,6 +36,12 @@ defineProps<{ leg: FlightLegData }>()
 
 function formatDate(iso: string): string {
     try { return new Date(iso).toLocaleString() } catch { return iso }
+}
+
+function formatDuration(seconds: number): string {
+    const m = Math.floor(seconds / 60)
+    const s = Math.round(seconds % 60)
+    return `${m}m ${s}s`
 }
 </script>
 

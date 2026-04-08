@@ -42,6 +42,10 @@
                         <div class="text-sm text-base-content/70">Temperature (°C)</div>
                         <div>{{ leg.tempC ?? '—' }}</div>
                     </div>
+                    <div v-if="leg.flightDurationSec != null">
+                        <div class="text-sm text-base-content/70">Flight duration</div>
+                        <div>{{ formatDuration(leg.flightDurationSec) }}</div>
+                    </div>
                 </div>
                 <div>
                     <div class="text-sm text-base-content/70">Description</div>
@@ -138,6 +142,12 @@ const aircraftError = ref('')
 
 function formatDate(iso: string): string {
     try { return new Date(iso).toLocaleString() } catch { return iso }
+}
+
+function formatDuration(seconds: number): string {
+    const m = Math.floor(seconds / 60)
+    const s = Math.round(seconds % 60)
+    return `${m}m ${s}s`
 }
 
 async function load() {

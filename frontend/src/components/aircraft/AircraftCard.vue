@@ -6,6 +6,7 @@
                 <span class="badge badge-outline">{{ aircraft.aircraftType || '—' }}</span>
             </div>
             <p class="text-sm text-base-content/70">Serial: {{ aircraft.serialNumber }}</p>
+            <p v-if="totalFlightMinutes != null" class="text-sm font-medium">Flight time: {{ formatFlightTime(totalFlightMinutes) }}</p>
             <p v-if="aircraft.notes" class="text-sm line-clamp-2">{{ aircraft.notes }}</p>
             <div class="card-actions justify-end mt-2">
                 <slot name="actions"></slot>
@@ -17,7 +18,14 @@
 <script setup lang="ts">
 import type { AircraftData } from '@/api/rest/aircraft.api';
 
-defineProps<{ aircraft: AircraftData }>()
+defineProps<{ aircraft: AircraftData; totalFlightMinutes?: number | null }>()
+
+function formatFlightTime(minutes: number | null): string {
+    if (minutes == null) return '\u2014'
+    const h = Math.floor(minutes / 60)
+    const m = Math.round(minutes % 60)
+    return `${h}h ${m}m`
+}
 </script>
 
 <style scoped></style>

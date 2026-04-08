@@ -18,6 +18,8 @@ export interface FlightLegRow {
   temp_c: number | null
   title: string | null
   description: string | null
+  flight_duration_sec: number | null
+  cumulative_flight_minutes: number | null
   user_profiles?: { full_name: string } | null
 }
 
@@ -33,6 +35,8 @@ export interface FlightLegData {
   tempC: number | null
   title: string | null
   description: string | null
+  flightDurationSec: number | null
+  cumulativeFlightMinutes: number | null
   pilotName?: string | null
 }
 
@@ -66,6 +70,8 @@ function mapRowToData(row: FlightLegRow): FlightLegData {
     tempC: row.temp_c,
     title: row.title,
     description: row.description,
+    flightDurationSec: row.flight_duration_sec,
+    cumulativeFlightMinutes: row.cumulative_flight_minutes,
     pilotName: row.user_profiles?.full_name ?? null,
   }
 }
