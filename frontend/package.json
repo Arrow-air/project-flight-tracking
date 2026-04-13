@@ -17,9 +17,9 @@
     "@tanstack/vue-query": "^5.83.1",
     "axios": "^1.11.0",
     "pinia": "^3.0.3",
+    "vite-plugin-dotenvx": "github:javelina-works/vite-plugin-dotenvx#dist-build",
     "vue": "^3.5.18",
-    "vue-router": "^4.5.1",
-    "vite-plugin-dotenvx": "github:javelina-works/vite-plugin-dotenvx#dist-build"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.11",
