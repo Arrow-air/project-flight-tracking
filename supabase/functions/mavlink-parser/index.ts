@@ -3,6 +3,7 @@ import { cors } from "hono/cors";
 import { functionCORS } from "../_shared/cors.ts";
 import { listFlightLegLogs, type FlightLogHandle } from "storage";
 
+import { supabaseAdmin } from "../_shared/supabaseAdmin.ts";
 import { getLogParamsDiff } from "./df-analysis/params.ts";
 import { getLogTimeAnalysis } from "./df-analysis/flight-time.ts";
 
@@ -118,6 +119,25 @@ async function handleLogTimeAnalysis(c: Context): Promise<Response> {
 
     // 2) Analyze the log time
     const timeAnalyses = await getLogTimeAnalysis(logs, {});
+
+    // 3) Write flight time back to the flight_legs row
+    if (timeAnalyses.length > 0) {
+      const lastResult = timeAnalyses[timeAnalyses.length - 1];
+      const updatePayload: Record<string, number> = {};
+      if (lastResult.totalFlightSeconds != null) {
+        updatePayload.flight_duration_sec = lastResult.totalFlightSeconds;
+      }
+      if (lastResult.estimatedTotalFlightMinutesAfter != null) {
+        updatePayload.cumulative_flight_minutes = lastResult.estimatedTotalFlightMinutesAfter;
+      }
+      if (Object.keys(updatePayload).length > 0) {
+        await supabaseAdmin
+          .from('flight_legs')
+          .update(updatePayload)
+          .eq('id', flightLegId);
+      }
+    }
+
     return c.json({ flightLegId, timeAnalyses });
   } catch (err) {
     console.error(err);

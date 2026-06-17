@@ -46,6 +46,14 @@
 								<div class="text-sm text-base-content/70">Owner</div>
 								<div class="truncate">{{ aircraft.ownerId || '—' }}</div>
 							</div>
+							<div>
+								<div class="text-sm text-base-content/70">Total flight time</div>
+								<div>{{ formatFlightTime(flightTotal?.totalFlightMinutes ?? null) }}</div>
+							</div>
+							<div>
+								<div class="text-sm text-base-content/70">Flight legs</div>
+								<div>{{ flightTotal?.totalFlightLegs ?? '—' }}</div>
+							</div>
 						</div>
 						<div>
 							<div class="text-sm text-base-content/70">Notes</div>
@@ -124,6 +132,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { AircraftData, UpdateAircraftInput } from '@/api/rest/aircraft.api'
 import { getAircraft, updateAircraft, deleteAircraft } from '@/api/rest/aircraft.api'
+import { getAircraftFlightTotal, type AircraftFlightTotal } from '@/api/rest/aircraft_flight_totals.api'
 import MaintenanceLogsSection from '@/components/aircraft_maintenance/MaintenanceLogsSection.vue';
 
 const route = useRoute()
@@ -139,6 +148,7 @@ const success = ref('')
 
 const form = ref<UpdateAircraftInput>({})
 const deleteDialogRef = ref<HTMLDialogElement | null>(null)
+const flightTotal = ref<AircraftFlightTotal | null>(null)
 
 function formatDate(iso: string): string {
 	try {
@@ -148,6 +158,13 @@ function formatDate(iso: string): string {
 	}
 }
 
+function formatFlightTime(minutes: number | null): string {
+	if (minutes == null) return '\u2014'
+	const h = Math.floor(minutes / 60)
+	const m = Math.round(minutes % 60)
+	return `${h}h ${m}m`
+}
+
 async function load() {
 	try {
 		error.value = ''
@@ -155,6 +172,8 @@ async function load() {
 		const id = route.params.id as string
 		const data = await getAircraft(id)
 		aircraft.value = data
+		// Fetch flight totals (non-blocking)
+		getAircraftFlightTotal(id).then(t => { flightTotal.value = t }).catch(() => {})
 	} catch (e: any) {
 		error.value = e?.message || 'Failed to load aircraft'
 	} finally {
